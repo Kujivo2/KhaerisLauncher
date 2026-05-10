@@ -1,36 +1,39 @@
 {
-    "version": "1.0.0",
-    "discord": {
-        "clientId": "385581240906022916",
-        "smallImageText": "WesterosCraft",
-        "smallImageKey": "seal-circle"
-    },
-    "java": {
-        "oracle": "http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html"
-    },
-    "rss": "https://forum.westeroscraft.com/forum/news.2/index.rss",
-     "servers": [
-  {
-    "id": "khaeris-rp",
-    "name": "Khaeris RP",
-    "description": "Serveur RP officiel Khaeris.",
-    "icon": "",
-    "version": "1.0.0",
-    "address": "localhost",
-    "minecraftVersion": "1.20.1",
-    "mainServer": true,
-    "autoconnect": false,
-    "modules": [
-      {
-        "id": "net.neoforged:forge:1.20.1-47.1.106",
-        "name": "NeoForge",
-        "type": "ForgeHosted",
-        "artifact": {
-          "size": 0,
-          "MD5": "",
-          "url": "https://maven.neoforged.net/releases/net/neoforged/forge/1.20.1-47.1.106/forge-1.20.1-47.1.106-universal.jar"
+  "version": "1.0.0",
+  "discord": {
+    "clientId": "385581240906022916",
+    "smallImageText": "Khaeris Launcher",
+    "smallImageKey": "seal-circle"
+  },
+  "java": {
+    "oracle": "https://www.oracle.com/java/technologies/downloads/"
+  },
+  "rss": "",
+  "servers": [
+    {
+      "id": "khaeris-rp",
+      "name": "Khaeris RP",
+      "description": "Serveur RP officiel Khaeris.",
+      "icon": "",
+      "version": "1.0.0",
+      "address": "localhost",
+      "minecraftVersion": "1.20.1",
+      "discord": {
+        "shortId": "Khaeris RP",
+        "largeImageText": "Khaeris RP",
+        "largeImageKey": "server-prod"
+      },
+      "mainServer": true,
+      "autoconnect": false,
+      "javaOptions": {
+        "supported": ">=17",
+        "suggestedMajor": 17,
+        "ram": {
+          "recommended": 4096,
+          "minimum": 2048
         }
-      }
-    ]
-  }
-]}
+      },
+      "modules": []
+    }
+  ]
+}
