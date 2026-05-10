@@ -4016,3 +4016,240 @@ input:checked + .toggleSwitchSlider:before {
 #launch_button:active {
     transform: translateY(1px);
 }
+/* Khaeris Glass Panels */
+
+.settingsAuthAccount,
+.settingsSelServContainer,
+.settingsChangelogContainer,
+#settingsAboutCurrentContainer,
+#settingsUpdateStatusContainer,
+.serverListing,
+.accountListing,
+.loginOptionButton {
+    background: rgba(15, 8, 30, 0.58) !important;
+    border: 1px solid rgba(168, 85, 247, 0.28) !important;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 0 18px rgba(88, 28, 135, 0.18);
+    border-radius: 14px !important;
+}
+
+.settingsAuthAccount:hover,
+.serverListing:hover,
+.accountListing:hover,
+.loginOptionButton:hover {
+    border-color: rgba(192, 132, 252, 0.55) !important;
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.28);
+}
+/* Khaeris Background Overlay */
+
+#landingContainer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(5, 0, 15, 0.72),
+            rgba(15, 0, 35, 0.55),
+            rgba(3, 0, 10, 0.88)
+        ),
+        radial-gradient(
+            circle at top,
+            rgba(139, 92, 246, 0.20),
+            transparent 45%
+        );
+
+    backdrop-filter: blur(1px);
+}
+
+/* Keep UI above overlay */
+#landingContainer > * {
+    position: relative;
+    z-index: 1;
+}
+/* Khaeris Premium Glow */
+
+#image_seal,
+#avatarContainer {
+    box-shadow:
+        0 0 12px rgba(139, 92, 246, 0.35),
+        0 0 28px rgba(139, 92, 246, 0.18) !important;
+}
+
+.mediaSVG {
+    transition: all 0.25s ease !important;
+}
+
+.mediaSVG:hover {
+    fill: #b388ff !important;
+    filter: drop-shadow(0 0 8px #a855f7);
+    transform: scale(1.12);
+}
+
+#newsButton {
+    padding: 12px 18px;
+    border-radius: 14px;
+    background: rgba(35, 10, 70, 0.55);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    transition: all 0.25s ease;
+}
+
+#newsButton:hover {
+    background: rgba(55, 20, 110, 0.72);
+    box-shadow: 0 0 18px rgba(139, 92, 246, 0.35);
+}
+/* Khaeris Final UI Polish */
+
+/* Background slow cinematic movement */
+body {
+    background-size: 105% !important;
+    background-position: center !important;
+    animation: khaerisBgMove 35s ease-in-out infinite alternate;
+}
+
+@keyframes khaerisBgMove {
+    from {
+        background-size: 105%;
+        background-position: center center;
+    }
+    to {
+        background-size: 112%;
+        background-position: center top;
+    }
+}
+
+/* Bottom bar premium glass */
+#landingContainer > #lower {
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(168, 85, 247, 0.25);
+    box-shadow: 0 -10px 35px rgba(20, 0, 45, 0.45);
+}
+
+/* Better bottom alignment */
+#landingContainer > #lower > #left #content,
+#landingContainer > #lower > #center #content,
+#landingContainer > #lower > #right #launch_content,
+#launch_details {
+    top: 18px !important;
+}
+
+/* News button premium */
+#newsButton {
+    min-width: 88px;
+    min-height: 80px;
+    border-radius: 18px !important;
+    background: rgba(25, 7, 55, 0.58) !important;
+    border: 1px solid rgba(168, 85, 247, 0.35) !important;
+    box-shadow: 0 0 22px rgba(88, 28, 135, 0.25);
+}
+
+#newsButton:hover {
+    background: rgba(75, 25, 145, 0.62) !important;
+    box-shadow: 0 0 28px rgba(168, 85, 247, 0.45);
+    transform: translateY(-2px);
+}
+
+/* Settings premium glass */
+#settingsContainer {
+    backdrop-filter: blur(12px);
+}
+
+.settingsTab {
+    padding-left: 10px;
+}
+
+.settingsFieldContainer,
+.settingsFileSelContainer,
+#settingsMemoryContainer,
+#settingsGameResolutionContainer,
+#settingsJVMOptsContainer,
+#settingsModsContainer {
+    background: rgba(12, 5, 28, 0.38);
+    border: 1px solid rgba(168, 85, 247, 0.18);
+    border-radius: 14px;
+    padding: 16px !important;
+    margin-bottom: 14px;
+    box-shadow: 0 0 18px rgba(88, 28, 135, 0.12);
+}
+
+/* Inputs */
+#settingsContainer input[type=number],
+#settingsContainer input[type=text],
+.settingsSelectSelected,
+.settingsSelectOptions div {
+    background: rgba(10, 4, 24, 0.75) !important;
+    border-color: rgba(168, 85, 247, 0.35) !important;
+}
+
+/* Scrollbar purple */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(5, 0, 15, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(168, 85, 247, 0.65);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(192, 132, 252, 0.9);
+}
+
+/* Global smoothness */
+button,
+.mediaSVG,
+.settingsNavItem,
+.loginOptionButton,
+.serverListing,
+.accountListing,
+#launch_button,
+#newsButton {
+    transition: all 0.25s ease !important;
+}
+/* Performance Optimization */
+
+* {
+    will-change: auto !important;
+}
+
+.settingsFieldContainer,
+.settingsFileSelContainer,
+#settingsMemoryContainer,
+#settingsGameResolutionContainer,
+#settingsJVMOptsContainer,
+#settingsModsContainer,
+#newsButton,
+#launch_button {
+    backdrop-filter: blur(2px) !important;
+    box-shadow: 0 0 10px rgba(88, 28, 135, 0.12) !important;
+}
+
+/* Reduce expensive transitions */
+button,
+.mediaSVG,
+.settingsNavItem,
+.loginOptionButton,
+.serverListing,
+.accountListing,
+#launch_button,
+#newsButton {
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease !important;
+}
+
+/* Disable animated zoom */
+body {
+    animation: none !important;
+}
+#newsButton {
+    display: none !important;
+}
