@@ -12,15 +12,27 @@ exports.loadLanguage = function(id){
 exports.query = function(id, placeHolders){
     let query = id.split('.')
     let res = lang
+
     for(let q of query){
+        if(res == null || typeof res !== 'object' || res[q] == null){
+            console.warn(`[LangLoader] Missing language key: ${id}`)
+            return ''
+        }
         res = res[q]
     }
+
     let text = res === lang ? '' : res
+
+    if(typeof text !== 'string'){
+        return ''
+    }
+
     if (placeHolders) {
         Object.entries(placeHolders).forEach(([key, value]) => {
             text = text.replace(`{${key}}`, value)
         })
     }
+
     return text
 }
 

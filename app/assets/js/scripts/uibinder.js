@@ -58,55 +58,88 @@ function getCurrentView(){
 }
 
 async function showMainUI(data){
+    console.log("ENTER showMainUI")
 
-    if(!isDev){
-        loggerAutoUpdater.info('Initializing..')
-        ipcRenderer.send('autoUpdateAction', 'initAutoUpdater', ConfigManager.getAllowPrerelease())
-    }
-
-    await prepareSettings(true)
-    updateSelectedServer(data.getServerById(ConfigManager.getSelectedServer()))
-    refreshServerStatus()
-    setTimeout(() => {
-        document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
-        document.body.style.backgroundImage = `url('assets/images/backgrounds/${document.body.getAttribute('bkid')}.jpg')`
-        $('#main').show()
-
-        const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
-
-        // If this is enabled in a development environment we'll get ratelimited.
-        // The relaunch frequency is usually far too high.
-        if(!isDev && isLoggedIn){
-            validateSelectedAccount()
+    try {
+        if(!isDev){
+            loggerAutoUpdater.info('Initializing..')
+            ipcRenderer.send('autoUpdateAction', 'initAutoUpdater', ConfigManager.getAllowPrerelease())
         }
 
-        if(ConfigManager.isFirstLaunch()){
-            currentView = VIEWS.welcome
-            $(VIEWS.welcome).fadeIn(1000)
-        } else {
-            if(isLoggedIn){
-                currentView = VIEWS.landing
-                $(VIEWS.landing).fadeIn(1000)
-            } else {
-                loginOptionsCancelEnabled(false)
-                loginOptionsViewOnLoginSuccess = VIEWS.landing
-                loginOptionsViewOnLoginCancel = VIEWS.loginOptions
-                currentView = VIEWS.loginOptions
-                $(VIEWS.loginOptions).fadeIn(1000)
-            }
-        }
+        console.log("prepareSettings start")
+        await prepareSettings(true)
+        console.log("prepareSettings done")
+
+        updateSelectedServer(data.getServerById(ConfigManager.getSelectedServer()))
+        refreshServerStatus()
 
         setTimeout(() => {
-            $('#loadingContainer').fadeOut(500, () => {
-                $('#loadSpinnerImage').removeClass('rotating')
+            console.log("show UI timeout start")
+
+            document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
+
+            const bgId = document.body.getAttribute('bkid')
+            document.body.style.backgroundImage = `url('assets/images/backgrounds/${bgId}.jpg')`
+
+            $('#main').show()
+
+            const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
+
+            if(!isDev && isLoggedIn){
+                validateSelectedAccount()
+            }
+
+            if(ConfigManager.isFirstLaunch()){
+                currentView = VIEWS.welcome
+                $(VIEWS.welcome).fadeIn(1000)
+            } else {
+                if(isLoggedIn){
+                    currentView = VIEWS.landing
+                    $(VIEWS.landing).fadeIn(1000)
+                } else {
+                    loginOptionsCancelEnabled(false)
+                    loginOptionsViewOnLoginSuccess = VIEWS.landing
+                    loginOptionsViewOnLoginCancel = VIEWS.loginOptions
+                    currentView = VIEWS.loginOptions
+                    $(VIEWS.loginOptions).fadeIn(1000)
+                }
+            }
+
+            setTimeout(() => {
+                $('#loadingContainer').fadeOut(500, () => {
+                    $('#loadSpinnerImage').removeClass('rotating')
+                })
+            }, 250)
+
+            console.log("EXIT showMainUI")
+        }, 750)
+
+        // News ne doit jamais bloquer le launcher.
+        try {
+            initNews().then(() => {
+                $('#newsContainer *').attr('tabindex', '-1')
+            }).catch(err => {
+                console.error("initNews error:", err)
             })
-        }, 250)
-        
-    }, 750)
-    // Disable tabbing to the news container.
-    initNews().then(() => {
-        $('#newsContainer *').attr('tabindex', '-1')
-    })
+        } catch(err) {
+            console.error("initNews crashed:", err)
+        }
+
+    } catch(err) {
+        console.error("showMainUI crashed:", err)
+
+        // Force l'affichage du menu login si un truc casse.
+        $('#main').show()
+        loginOptionsCancelEnabled(false)
+        loginOptionsViewOnLoginSuccess = VIEWS.landing
+        loginOptionsViewOnLoginCancel = VIEWS.loginOptions
+        currentView = VIEWS.loginOptions
+        $(VIEWS.loginOptions).fadeIn(1000)
+
+        $('#loadingContainer').fadeOut(500, () => {
+            $('#loadSpinnerImage').removeClass('rotating')
+        })
+    }
 }
 
 function showFatalStartupError(){
@@ -437,16 +470,26 @@ document.addEventListener('readystatechange', async () => {
 
 // Actions that must be performed after the distribution index is downloaded.
 ipcRenderer.on('distributionIndexDone', async (event, res) => {
+    console.log("distributionIndexDone reçu:", res)
+    console.log("document.readyState:", document.readyState)
+
     if(res) {
+        console.log("Avant getDistribution")
         const data = await DistroAPI.getDistribution()
+        console.log("Après getDistribution", data)
+
         syncModConfigurations(data)
         ensureJavaSettings(data)
+
         if(document.readyState === 'interactive' || document.readyState === 'complete'){
+            console.log("Appel showMainUI")
             await showMainUI(data)
         } else {
+            console.log("Document pas prêt, rscShouldLoad = true")
             rscShouldLoad = true
         }
     } else {
+        console.log("distributionIndexDone = false")
         fatalStartupError = true
         if(document.readyState === 'interactive' || document.readyState === 'complete'){
             showFatalStartupError()
