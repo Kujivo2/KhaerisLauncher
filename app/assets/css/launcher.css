@@ -3966,3 +3966,34 @@ input:checked + .toggleSwitchSlider:before {
 .rotating {
     animation: rotating 10s linear infinite;
 }
+/* Khaeris Theme - safe base */
+:root {
+    --khaeris-bg: #07030f;
+    --khaeris-panel: rgba(14, 6, 28, 0.62);
+    --khaeris-purple: #8b5cf6;
+    --khaeris-purple-soft: rgba(139, 92, 246, 0.45);
+    --khaeris-text: #f5efff;
+}
+
+#frameBar {
+    background: rgba(5, 2, 12, 0.92) !important;
+    border-bottom: 1px solid var(--khaeris-purple-soft);
+}
+
+#landingContainer > #lower {
+    background: linear-gradient(
+        to top,
+        rgba(7, 3, 15, 0.92),
+        rgba(35, 12, 70, 0.28),
+        rgba(0, 0, 0, 0)
+    ) !important;
+}
+
+#launch_button {
+    color: var(--khaeris-text) !important;
+    text-shadow: 0 0 14px var(--khaeris-purple) !important;
+}
+
+#launch_button:hover {
+    text-shadow: 0 0 22px var(--khaeris-purple), 0 0 35px var(--khaeris-purple) !important;
+}
