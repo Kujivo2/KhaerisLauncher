@@ -3997,3 +3997,22 @@ input:checked + .toggleSwitchSlider:before {
 #launch_button:hover {
     text-shadow: 0 0 22px var(--khaeris-purple), 0 0 35px var(--khaeris-purple) !important;
 }
+/* Khaeris Play Button */
+#launch_button {
+    padding: 10px 26px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, rgba(91, 33, 182, 0.85), rgba(168, 85, 247, 0.85)) !important;
+    border: 1px solid rgba(216, 180, 254, 0.65) !important;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.45) !important;
+    color: white !important;
+}
+
+#launch_button:hover,
+#launch_button:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 0 28px rgba(168, 85, 247, 0.85) !important;
+}
+
+#launch_button:active {
+    transform: translateY(1px);
+}
