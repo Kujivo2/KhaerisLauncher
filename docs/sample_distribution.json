@@ -1,10 +1,6 @@
 {
   "version": "1.0.0",
-  "discord": {
-    "clientId": "385581240906022916",
-    "smallImageText": "Khaeris Launcher",
-    "smallImageKey": "seal-circle"
-  },
+  "discord": null,
   "java": {
     "oracle": "https://www.oracle.com/java/technologies/downloads/"
   },
@@ -50,14 +46,47 @@
         "name": "NeoForge Version Manifest",
         "type": "VersionManifest",
         "artifact": {
-          "size": 0,
+          "size": 19200,
           "MD5": "",
-          "url": "https://raw.githubusercontent.com/Kujivo2/KhaerisLauncher/refs/heads/ui-rework/docs/neoforge/1.20.1-neoforge-47.1.106.json"
+          "url": "https://raw.githubusercontent.com/Kujivo2/KhaerisLauncher/ui-rework/docs/neoforge/1.20.1-neoforge-47.1.106.json"
         }
       }
     ]
+  },
+
+  {
+    "id": "cpw.mods:bootstraplauncher:1.1.2",
+    "name": "Bootstrap Launcher",
+    "type": "Library",
+    "artifact": {
+      "size": 8284,
+      "MD5": "",
+      "url": "https://maven.neoforged.net/releases/cpw/mods/bootstraplauncher/1.1.2/bootstraplauncher-1.1.2.jar"
+    }
+  },
+
+  {
+    "id": "cpw.mods:securejarhandler:2.1.10",
+    "name": "Secure Jar Handler",
+    "type": "Library",
+    "artifact": {
+      "size": 88749,
+      "MD5": "",
+      "url": "https://maven.neoforged.net/releases/cpw/mods/securejarhandler/2.1.10/securejarhandler-2.1.10.jar"
+    }
+  },
+
+  {
+    "id": "cpw.mods:modlauncher:10.0.9",
+    "name": "Mod Launcher",
+    "type": "Library",
+    "artifact": {
+      "size": 130343,
+      "MD5": "",
+      "url": "https://maven.neoforged.net/releases/cpw/mods/modlauncher/10.0.9/modlauncher-10.0.9.jar"
+    }
   }
 ]
-    }
-  ]
+}
+  ] 
 }
