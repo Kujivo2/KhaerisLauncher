@@ -31,62 +31,369 @@
         }
       },
       "modules": [
-  {
-    "id": "net.neoforged:forge:1.20.1-47.1.106",
-    "name": "NeoForge 1.20.1",
-    "type": "ForgeHosted",
-    "artifact": {
-      "size": 2143358,
-      "MD5": "",
-      "url": "https://maven.neoforged.net/releases/net/neoforged/forge/1.20.1-47.1.106/forge-1.20.1-47.1.106-universal.jar"
-    },
-    "subModules": [
-      {
-        "id": "1.20.1-neoforge-47.1.106",
-        "name": "NeoForge Version Manifest",
-        "type": "VersionManifest",
-        "artifact": {
-          "size": 19200,
-          "MD5": "",
-          "url": "https://raw.githubusercontent.com/Kujivo2/KhaerisLauncher/ui-rework/docs/neoforge/1.20.1-neoforge-47.1.106.json"
+        {
+          "id": "net.neoforged:forge:1.20.1-47.1.106",
+          "name": "NeoForge 1.20.1",
+          "type": "ForgeHosted",
+          "artifact": {
+            "size": 2143358,
+            "MD5": "",
+            "url": "https://maven.neoforged.net/releases/net/neoforged/forge/1.20.1-47.1.106/forge-1.20.1-47.1.106-universal.jar"
+          },
+          "subModules": [
+            {
+              "id": "1.20.1-neoforge-47.1.106",
+              "name": "NeoForge Version Manifest",
+              "type": "VersionManifest",
+              "artifact": {
+                "size": 19200,
+                "MD5": "",
+                "url": "https://raw.githubusercontent.com/Kujivo2/KhaerisLauncher/ui-rework/docs/neoforge/1.20.1-neoforge-47.1.106.json"
+              }
+            },
+            {
+              "id": "net.neoforged.fancymodloader:loader:47.2.2",
+              "name": "NeoForged FML Loader",
+              "type": "Library",
+              "artifact": {
+                "size": 267183,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/neoforged/fancymodloader/loader/47.2.2/loader-47.2.2.jar"
+              }
+            },
+            {
+              "id": "net.neoforged.fancymodloader:earlydisplay:47.2.2",
+              "name": "NeoForged FML Early Display",
+              "type": "Library",
+              "artifact": {
+                "size": 260383,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/neoforged/fancymodloader/earlydisplay/47.2.2/earlydisplay-47.2.2.jar"
+              }
+            },
+            {
+              "id": "cpw.mods:securejarhandler:2.1.10",
+              "name": "Secure Jar Handler",
+              "type": "Library",
+              "artifact": {
+                "size": 88749,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/cpw/mods/securejarhandler/2.1.10/securejarhandler-2.1.10.jar"
+              }
+            },
+            {
+              "id": "org.ow2.asm:asm:9.5",
+              "name": "ASM",
+              "type": "Library",
+              "artifact": {
+                "size": 121863,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/ow2/asm/asm/9.5/asm-9.5.jar"
+              }
+            },
+            {
+              "id": "org.ow2.asm:asm-commons:9.5",
+              "name": "ASM Commons",
+              "type": "Library",
+              "artifact": {
+                "size": 72209,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/ow2/asm/asm-commons/9.5/asm-commons-9.5.jar"
+              }
+            },
+            {
+              "id": "org.ow2.asm:asm-tree:9.5",
+              "name": "ASM Tree",
+              "type": "Library",
+              "artifact": {
+                "size": 51944,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/ow2/asm/asm-tree/9.5/asm-tree-9.5.jar"
+              }
+            },
+            {
+              "id": "org.ow2.asm:asm-util:9.5",
+              "name": "ASM Util",
+              "type": "Library",
+              "artifact": {
+                "size": 91076,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/ow2/asm/asm-util/9.5/asm-util-9.5.jar"
+              }
+            },
+            {
+              "id": "org.ow2.asm:asm-analysis:9.5",
+              "name": "ASM Analysis",
+              "type": "Library",
+              "artifact": {
+                "size": 33978,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/ow2/asm/asm-analysis/9.5/asm-analysis-9.5.jar"
+              }
+            },
+            {
+              "id": "net.minecraftforge:accesstransformers:8.0.4",
+              "name": "Forge Access Transformers",
+              "type": "Library",
+              "artifact": {
+                "size": 77756,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecraftforge/accesstransformers/8.0.4/accesstransformers-8.0.4.jar"
+              }
+            },
+            {
+              "id": "org.antlr:antlr4-runtime:4.9.1",
+              "name": "ANTLR 4 Runtime",
+              "type": "Library",
+              "artifact": {
+                "size": 337868,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/antlr/antlr4-runtime/4.9.1/antlr4-runtime-4.9.1.jar"
+              }
+            },
+            {
+              "id": "net.minecraftforge:eventbus:6.0.5",
+              "name": "Forge Event Bus",
+              "type": "Library",
+              "artifact": {
+                "size": 53985,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecraftforge/eventbus/6.0.5/eventbus-6.0.5.jar"
+              }
+            },
+            {
+              "id": "net.minecraftforge:forgespi:7.0.1",
+              "name": "Forge SPI",
+              "type": "Library",
+              "artifact": {
+                "size": 29831,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecraftforge/forgespi/7.0.1/forgespi-7.0.1.jar"
+              }
+            },
+            {
+              "id": "net.minecraftforge:coremods:5.0.1",
+              "name": "Forge Core Mods",
+              "type": "Library",
+              "artifact": {
+                "size": 24199,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecraftforge/coremods/5.0.1/coremods-5.0.1.jar"
+              }
+            },
+            {
+              "id": "cpw.mods:modlauncher:10.0.9",
+              "name": "Mod Launcher",
+              "type": "Library",
+              "artifact": {
+                "size": 130343,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/cpw/mods/modlauncher/10.0.9/modlauncher-10.0.9.jar"
+              }
+            },
+            {
+              "id": "net.minecraftforge:unsafe:0.2.0",
+              "name": "Forge Unsafe",
+              "type": "Library",
+              "artifact": {
+                "size": 2834,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecraftforge/unsafe/0.2.0/unsafe-0.2.0.jar"
+              }
+            },
+            {
+              "id": "net.minecraftforge:mergetool:1.1.5:api",
+              "name": "Forge Merge Tool API",
+              "type": "Library",
+              "artifact": {
+                "size": 2572,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecraftforge/mergetool/1.1.5/mergetool-1.1.5-api.jar"
+              }
+            },
+            {
+              "id": "com.electronwill.night-config:core:3.6.4",
+              "name": "Night Config Core",
+              "type": "Library",
+              "artifact": {
+                "size": 199834,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/com/electronwill/night-config/core/3.6.4/core-3.6.4.jar"
+              }
+            },
+            {
+              "id": "com.electronwill.night-config:toml:3.6.4",
+              "name": "Night Config TOML",
+              "type": "Library",
+              "artifact": {
+                "size": 31816,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/com/electronwill/night-config/toml/3.6.4/toml-3.6.4.jar"
+              }
+            },
+            {
+              "id": "org.apache.maven:maven-artifact:3.8.5",
+              "name": "Maven Artifact",
+              "type": "Library",
+              "artifact": {
+                "size": 58077,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/apache/maven/maven-artifact/3.8.5/maven-artifact-3.8.5.jar"
+              }
+            },
+            {
+              "id": "net.jodah:typetools:0.6.3",
+              "name": "Type Tools",
+              "type": "Library",
+              "artifact": {
+                "size": 18281,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/jodah/typetools/0.6.3/typetools-0.6.3.jar"
+              }
+            },
+            {
+              "id": "net.minecrell:terminalconsoleappender:1.2.0",
+              "name": "Terminal Console Appender",
+              "type": "Library",
+              "artifact": {
+                "size": 15977,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecrell/terminalconsoleappender/1.2.0/terminalconsoleappender-1.2.0.jar"
+              }
+            },
+            {
+              "id": "org.jline:jline-reader:3.12.1",
+              "name": "JLine Reader",
+              "type": "Library",
+              "artifact": {
+                "size": 150765,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/jline/jline-reader/3.12.1/jline-reader-3.12.1.jar"
+              }
+            },
+            {
+              "id": "org.jline:jline-terminal:3.12.1",
+              "name": "JLine Terminal",
+              "type": "Library",
+              "artifact": {
+                "size": 211712,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/jline/jline-terminal/3.12.1/jline-terminal-3.12.1.jar"
+              }
+            },
+            {
+              "id": "org.spongepowered:mixin:0.8.5",
+              "name": "Mixin",
+              "type": "Library",
+              "artifact": {
+                "size": 1089277,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/spongepowered/mixin/0.8.5/mixin-0.8.5.jar"
+              }
+            },
+            {
+              "id": "org.openjdk.nashorn:nashorn-core:15.3",
+              "name": "Nashorn Core",
+              "type": "Library",
+              "artifact": {
+                "size": 2167288,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/org/openjdk/nashorn/nashorn-core/15.3/nashorn-core-15.3.jar"
+              }
+            },
+            {
+              "id": "net.minecraftforge:JarJarSelector:0.3.19",
+              "name": "Forge Jar Jar Selector",
+              "type": "Library",
+              "artifact": {
+                "size": 17374,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecraftforge/JarJarSelector/0.3.19/JarJarSelector-0.3.19.jar"
+              }
+            },
+            {
+              "id": "net.minecraftforge:JarJarMetadata:0.3.19",
+              "name": "Forge Jar Jar Metadata",
+              "type": "Library",
+              "artifact": {
+                "size": 15895,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecraftforge/JarJarMetadata/0.3.19/JarJarMetadata-0.3.19.jar"
+              }
+            },
+            {
+              "id": "cpw.mods:bootstraplauncher:1.1.2",
+              "name": "Bootstrap Launcher",
+              "type": "Library",
+              "artifact": {
+                "size": 8284,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/cpw/mods/bootstraplauncher/1.1.2/bootstraplauncher-1.1.2.jar"
+              }
+            },
+            {
+              "id": "net.minecraftforge:JarJarFileSystems:0.3.19",
+              "name": "Forge Jar Jar File Systems",
+              "type": "Library",
+              "artifact": {
+                "size": 32195,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/minecraftforge/JarJarFileSystems/0.3.19/JarJarFileSystems-0.3.19.jar"
+              }
+            },
+            {
+              "id": "net.neoforged.fancymodloader:events:47.2.2",
+              "name": "NeoForged FML Events",
+              "type": "Library",
+              "artifact": {
+                "size": 14661,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/neoforged/fancymodloader/events/47.2.2/events-47.2.2.jar"
+              }
+            },
+            {
+              "id": "net.neoforged.fancymodloader:core:47.2.2",
+              "name": "NeoForged FML Core",
+              "type": "Library",
+              "artifact": {
+                "size": 117581,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/neoforged/fancymodloader/core/47.2.2/core-47.2.2.jar"
+              }
+            },
+            {
+              "id": "net.neoforged.fancymodloader:language-java:47.2.2",
+              "name": "NeoForged FML Language Java",
+              "type": "Library",
+              "artifact": {
+                "size": 17440,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/neoforged/fancymodloader/language-java/47.2.2/language-java-47.2.2.jar"
+              }
+            },
+            {
+              "id": "net.neoforged.fancymodloader:language-lowcode:47.2.2",
+              "name": "NeoForged FML Language Low Code",
+              "type": "Library",
+              "artifact": {
+                "size": 7333,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/neoforged/fancymodloader/language-lowcode/47.2.2/language-lowcode-47.2.2.jar"
+              }
+            },
+            {
+              "id": "net.neoforged.fancymodloader:language-minecraft:47.2.2",
+              "name": "NeoForged FML Language Minecraft",
+              "type": "Library",
+              "artifact": {
+                "size": 4933,
+                "MD5": "",
+                "url": "https://maven.neoforged.net/releases/net/neoforged/fancymodloader/language-minecraft/47.2.2/language-minecraft-47.2.2.jar"
+              }
+            }
+          ]
         }
-      }
-    ]
-  },
-
-  {
-    "id": "cpw.mods:bootstraplauncher:1.1.2",
-    "name": "Bootstrap Launcher",
-    "type": "Library",
-    "artifact": {
-      "size": 8284,
-      "MD5": "",
-      "url": "https://maven.neoforged.net/releases/cpw/mods/bootstraplauncher/1.1.2/bootstraplauncher-1.1.2.jar"
+      ]
     }
-  },
-
-  {
-    "id": "cpw.mods:securejarhandler:2.1.10",
-    "name": "Secure Jar Handler",
-    "type": "Library",
-    "artifact": {
-      "size": 88749,
-      "MD5": "",
-      "url": "https://maven.neoforged.net/releases/cpw/mods/securejarhandler/2.1.10/securejarhandler-2.1.10.jar"
-    }
-  },
-
-  {
-    "id": "cpw.mods:modlauncher:10.0.9",
-    "name": "Mod Launcher",
-    "type": "Library",
-    "artifact": {
-      "size": 130343,
-      "MD5": "",
-      "url": "https://maven.neoforged.net/releases/cpw/mods/modlauncher/10.0.9/modlauncher-10.0.9.jar"
-    }
-  }
-]
-}
-  ] 
+  ]
 }
