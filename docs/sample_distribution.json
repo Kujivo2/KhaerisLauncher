@@ -402,26 +402,6 @@
               }
             },
             {
-              "id": "net.minecraft:client:1.20.1-20230612.114412:srg",
-              "name": "Minecraft Client SRG",
-              "type": "Library",
-              "artifact": {
-                "size": 0,
-                "MD5": "",
-                "url": "https://raw.githubusercontent.com/Kujivo2/KhaerisLauncher/ui-rework/docs/neoforge/libs/client-1.20.1-20230612.114412-srg.jar"
-              }
-            },
-            {
-              "id": "net.minecraft:client:1.20.1-20230612.114412:extra",
-              "name": "Minecraft Client Extra",
-              "type": "Library",
-              "artifact": {
-                "size": 0,
-                "MD5": "",
-                "url": "https://raw.githubusercontent.com/Kujivo2/KhaerisLauncher/ui-rework/docs/neoforge/libs/client-1.20.1-20230612.114412-extra.jar"
-              }
-            },
-            {
               "id": "net.neoforged:forge:1.20.1-47.1.106:client",
               "name": "NeoForge Client",
               "type": "Library",
