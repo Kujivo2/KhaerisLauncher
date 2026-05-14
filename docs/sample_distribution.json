@@ -392,39 +392,6 @@
               }
             },
             {
-              "id": "client-1.20.1-20230612.114412-srg",
-              "name": "Minecraft Client SRG",
-              "type": "File",
-              "artifact": {
-                "size": 0,
-                "MD5": "",
-                "path": "../../common/libraries/net/minecraft/client/1.20.1-20230612.114412/client-1.20.1-20230612.114412-srg.jar",
-                "url": ""
-              }
-            },
-            {
-              "id": "client-1.20.1-20230612.114412-extra",
-              "name": "Minecraft Client Extra",
-              "type": "File",
-              "artifact": {
-                "size": 0,
-                "MD5": "",
-                "path": "../../common/libraries/net/minecraft/client/1.20.1-20230612.114412/client-1.20.1-20230612.114412-extra.jar",
-                "url": ""
-              }
-            },
-            {
-              "id": "forge-1.20.1-47.1.106-client",
-              "name": "Forge Client",
-              "type": "File",
-              "artifact": {
-                "size": 0,
-                "MD5": "",
-                "path": "../../common/libraries/net/neoforged/forge/1.20.1-47.1.106/forge-1.20.1-47.1.106-client.jar",
-                "url": ""
-              }
-            },
-            {
               "id": "neoforge-universal-fix",
               "name": "NeoForge Universal Fix",
               "type": "File",
