@@ -34,11 +34,11 @@
         {
           "id": "net.fabricmc:fabric-loader:0.19.2",
           "name": "Fabric Loader 0.19.2",
-          "type": "Fabric",
+          "type": "Library",
           "artifact": {
             "size": 0,
             "MD5": "",
-            "url": ""
+            "url": "https://maven.fabricmc.net/net/fabricmc/fabric-loader/0.19.2/fabric-loader-0.19.2.jar"
           }
         }
       ]
