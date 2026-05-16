@@ -113,6 +113,67 @@ exports.save = function(){
     fs.writeFileSync(configPath, JSON.stringify(config, null, 4), 'UTF-8')
 }
 
+// Profiles management (instances)
+let profilesCache = null
+
+function _profilesPath(){
+    try{
+        // If config not loaded yet, fallback to default data directory
+        const base = (config != null && config.settings && config.settings.launcher && config.settings.launcher.dataDirectory) ? config.settings.launcher.dataDirectory : DEFAULT_CONFIG.settings.launcher.dataDirectory
+        return path.join(base, 'profiles.json')
+    } catch(err){
+        return path.join(DEFAULT_CONFIG.settings.launcher.dataDirectory, 'profiles.json')
+    }
+}
+
+exports.getProfiles = function(){
+    if(profilesCache != null) return profilesCache
+    const profilesPath = _profilesPath()
+    try{
+        if(fs.existsSync(profilesPath)){
+            profilesCache = JSON.parse(fs.readFileSync(profilesPath, 'utf8'))
+        } else {
+            profilesCache = []
+        }
+    } catch(err){
+        logger.warn('Failed to load profiles.json, starting with empty list', err)
+        profilesCache = []
+    }
+    return profilesCache
+}
+
+exports.saveProfiles = function(){
+    try{
+        const profilesPath = _profilesPath()
+        fs.ensureDirSync(path.join(profilesPath, '..'))
+        fs.writeFileSync(profilesPath, JSON.stringify(exports.getProfiles(), null, 4), 'utf8')
+    } catch(err){
+        logger.error('Failed to save profiles.json', err)
+    }
+}
+
+/**
+ * Create a new profile and instance directory structure.
+ * profile = { id, name, minecraftVersion, loader, loaderVersion, instanceDir }
+ */
+exports.createProfile = function(profile){
+    const profiles = exports.getProfiles()
+    profiles.push(profile)
+    const instBase = path.join(exports.getDataDirectory(), 'instances', profile.instanceDir)
+    try{
+        fs.ensureDirSync(path.join(instBase, 'mods'))
+        fs.ensureDirSync(path.join(instBase, 'config'))
+        fs.ensureDirSync(path.join(instBase, 'resourcepacks'))
+        fs.ensureDirSync(path.join(instBase, 'saves'))
+        fs.ensureFileSync(path.join(instBase, 'options.txt'))
+        exports.saveProfiles()
+        return profile
+    } catch(err){
+        logger.error('Failed to create instance directories', err)
+        throw err
+    }
+}
+
 /**
  * Load the configuration into memory. If a configuration file exists,
  * that will be read and saved. Otherwise, a default configuration will
@@ -252,6 +313,15 @@ exports.getCommonDirectory = function(){
  * @returns {string} The launcher's instance directory.
  */
 exports.getInstanceDirectory = function(){
+    // If a profile is selected, use its instanceDir as base
+    try{
+        const selected = exports.getSelectedProfile()
+        if(selected && selected.instanceDir){
+            return path.join(exports.getDataDirectory(), 'instances', selected.instanceDir)
+        }
+    } catch(err){
+        // ignore and fallback
+    }
     return path.join(exports.getDataDirectory(), 'instances')
 }
 
@@ -790,4 +860,19 @@ exports.getAllowPrerelease = function(def = false){
  */
 exports.setAllowPrerelease = function(allowPrerelease){
     config.settings.launcher.allowPrerelease = allowPrerelease
+}
+
+/** Profile selection API **/
+exports.getSelectedProfile = function(){
+    const sel = config.selectedProfile
+    if(!sel) return null
+    const profiles = exports.getProfiles()
+    for(let p of profiles){
+        if(p.id === sel) return p
+    }
+    return null
+}
+
+exports.setSelectedProfile = function(profileId){
+    config.selectedProfile = profileId
 }

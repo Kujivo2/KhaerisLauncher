@@ -115,6 +115,10 @@
                     <button id="launch_button">JOUER</button>
                     <div class="bot_divider"></div>
                     <button id="server_selection_button" class="bot_label">&#8226; Aucun serveur sélectionné</button>
+                    <div class="bot_divider"></div>
+                    <button id="profile_selection_button" class="bot_label">Profil: Aucun</button>
+                    <div class="bot_divider"></div>
+                    <button id="create_profile_button" class="bot_label">+ Créer un profil</button>
                 </div>
                 <div id="launch_details">
                     <div id="launch_details_left">
@@ -187,5 +191,35 @@
             </div>
         </div>
     </div>
+    <div id="createProfileModal" class="modal" style="display:none;">
+        <div class="modalContent">
+            <h3>Créer un profil</h3>
+            <label>Nom</label>
+            <input type="text" id="profile_name" />
+            <label>Version Minecraft</label>
+            <input type="text" id="profile_mcversion" placeholder="1.20.1" />
+            <label>Loader</label>
+            <select id="profile_loader">
+                <option value="vanilla">Vanilla</option>
+                <option value="fabric">Fabric</option>
+            </select>
+            <label>Loader Version (optionnel)</label>
+            <input type="text" id="profile_loaderversion" placeholder="0.19.2-1.20.1" />
+            <div class="modalActions">
+                <button id="create_profile_confirm">Créer</button>
+                <button id="create_profile_cancel">Annuler</button>
+            </div>
+        </div>
+    </div>
+    <div id="profileSelectionModal" class="modal" style="display:none;">
+        <div class="modalContent">
+            <h3>Sélectionner un profil</h3>
+            <div id="profiles_list_container"></div>
+            <div class="modalActions">
+                <button id="profile_select_close">Fermer</button>
+            </div>
+        </div>
+    </div>
     <script src="./assets/js/scripts/landing.js"></script>
+    <script src="./assets/js/scripts/profiles.js"></script>
 </div>
