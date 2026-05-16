@@ -1,5 +1,6 @@
 // profiles.js - manage create profile modal and creation
 const ProfilesConfigManager = require('../configmanager')
+const ProfilesGot = require('got')
 const { LoggerUtil } = require('helios-core')
 const profilesLogger = LoggerUtil.getLogger('Profiles')
 
@@ -42,13 +43,28 @@ function setLoaderVersionOptions(options, emptyText) {
     }
 }
 
+function setMinecraftVersionOptions(options, emptyText) {
+    profileMcVersion.innerHTML = ''
+    if(emptyText != null) {
+        const option = document.createElement('option')
+        option.value = ''
+        option.textContent = emptyText
+        profileMcVersion.appendChild(option)
+    }
+    for(const entry of options) {
+        const option = document.createElement('option')
+        option.value = entry.id
+        option.textContent = entry.label
+        profileMcVersion.appendChild(option)
+    }
+}
+
 async function loadMinecraftVersions() {
     if(minecraftVersionsCache != null) {
         return minecraftVersionsCache
     }
 
-    const response = await fetch(MOJANG_VERSION_MANIFEST)
-    const manifest = await response.json()
+    const manifest = (await ProfilesGot.get(MOJANG_VERSION_MANIFEST, { responseType: 'json' })).body
     minecraftVersionsCache = manifest.versions.map(version => ({
         id: version.id,
         type: version.type
@@ -61,22 +77,19 @@ async function loadForgeVersions() {
         return forgeVersionsCache
     }
 
-    const response = await fetch(FORGE_METADATA_ENDPOINT)
-    const xml = await response.text()
+    const xml = (await ProfilesGot.get(FORGE_METADATA_ENDPOINT)).body
     forgeVersionsCache = Array.from(xml.matchAll(/<version>([^<]+)<\/version>/g), match => match[1])
     return forgeVersionsCache
 }
 
 async function populateMinecraftVersions() {
     setVersionStatus('Chargement des versions Minecraft...')
+    setMinecraftVersionOptions([], 'Chargement...')
     const versions = await loadMinecraftVersions()
-    profileMcVersion.innerHTML = ''
-    for(const version of versions) {
-        const option = document.createElement('option')
-        option.value = version.id
-        option.textContent = `${version.id}${version.type === 'snapshot' ? ' (snapshot)' : ''}`
-        profileMcVersion.appendChild(option)
-    }
+    setMinecraftVersionOptions(versions.map(version => ({
+        id: version.id,
+        label: `${version.id}${version.type === 'snapshot' ? ' (snapshot)' : ''}`
+    })))
     profileMcVersion.value = versions.find(version => version.type === 'release')?.id || versions[0]?.id || ''
     setVersionStatus('')
 }
@@ -100,8 +113,7 @@ async function populateLoaderVersions() {
     try {
         if(loader === 'fabric') {
             setVersionStatus('Chargement des loaders Fabric...')
-            const response = await fetch(`${FABRIC_LOADER_ENDPOINT}/${mcVersion}`)
-            const loaders = await response.json()
+            const loaders = (await ProfilesGot.get(`${FABRIC_LOADER_ENDPOINT}/${mcVersion}`, { responseType: 'json' })).body
             const options = loaders.map(entry => ({
                 value: entry.loader.version,
                 label: `${entry.loader.version}${entry.loader.stable ? ' (stable)' : ''}`
@@ -133,7 +145,7 @@ async function showCreateProfile(){
             await populateMinecraftVersions()
         } catch(err) {
             profilesLogger.error('Failed to load Minecraft versions', err)
-            profileMcVersion.innerHTML = '<option value="">Impossible de charger les versions</option>'
+            setMinecraftVersionOptions([], 'Impossible de charger les versions')
             setVersionStatus('Vérifie ta connexion puis réessaie.')
         }
     }
