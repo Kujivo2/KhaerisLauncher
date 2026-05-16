@@ -33,23 +33,25 @@
       "modules": [
         {
           "id": "net.fabricmc:fabric-loader:0.19.2",
-          "name": "Fabric Loader",
+          "name": "Fabric Loader 0.19.2",
           "type": "Fabric",
           "artifact": {
-            "size": 2847,
+            "size": 1968930,
             "MD5": "",
             "url": "https://maven.fabricmc.net/net/fabricmc/fabric-loader/0.19.2/fabric-loader-0.19.2.jar"
-          }
-        },
-        {
-          "id": "fabric-loader-0.19.2-1.20.1",
-          "name": "Fabric Version Manifest",
-          "type": "VersionManifest",
-          "artifact": {
-            "size": 2232,
-            "MD5": "",
-            "url": "https://raw.githubusercontent.com/Kujivo2/KhaerisLauncher/ui-rework/docs/fabric/fabric-loader-0.19.2-1.20.1.json"
-          }
+          },
+          "subModules": [
+            {
+              "id": "fabric-loader-0.19.2-1.20.1",
+              "name": "Fabric Version Manifest",
+              "type": "VersionManifest",
+              "artifact": {
+                "size": 2847,
+                "MD5": "",
+                "url": "https://raw.githubusercontent.com/Kujivo2/KhaerisLauncher/ui-rework/docs/fabric/fabric-loader-0.19.2-1.20.1.json"
+              }
+            }
+          ]
         }
       ]
     }
