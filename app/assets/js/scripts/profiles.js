@@ -1,7 +1,7 @@
 // profiles.js - manage create profile modal and creation
-const ConfigManager = require('../configmanager')
+const ProfilesConfigManager = require('../configmanager')
 const { LoggerUtil } = require('helios-core')
-const logger = LoggerUtil.getLogger('Profiles')
+const profilesLogger = LoggerUtil.getLogger('Profiles')
 
 const MOJANG_VERSION_MANIFEST = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
 const FABRIC_LOADER_ENDPOINT = 'https://meta.fabricmc.net/v2/versions/loader'
@@ -119,7 +119,7 @@ async function populateLoaderVersions() {
             setLoaderVersionOptions(options, options.length > 0 ? 'Dernière build Forge' : 'Aucune build Forge compatible')
         }
     } catch(err) {
-        logger.error('Failed to load loader versions', err)
+        profilesLogger.error('Failed to load loader versions', err)
         setLoaderVersionOptions([], 'Impossible de charger les versions')
     } finally {
         setVersionStatus('')
@@ -132,7 +132,7 @@ async function showCreateProfile(){
         try {
             await populateMinecraftVersions()
         } catch(err) {
-            logger.error('Failed to load Minecraft versions', err)
+            profilesLogger.error('Failed to load Minecraft versions', err)
             profileMcVersion.innerHTML = '<option value="">Impossible de charger les versions</option>'
             setVersionStatus('Vérifie ta connexion puis réessaie.')
         }
@@ -146,7 +146,7 @@ function hideCreateProfile(){
 createProfileBtn.addEventListener('click', e => {
     e.preventDefault()
     showCreateProfile().catch(err => {
-        logger.error('Failed to open create profile modal', err)
+        profilesLogger.error('Failed to open create profile modal', err)
         setVersionStatus('Impossible de charger les versions.')
     })
 })
@@ -195,24 +195,24 @@ createProfileConfirm.addEventListener('click', async e => {
     }
 
     try{
-        ConfigManager.createProfile(profile)
-        ConfigManager.ensureProfileJavaConfig(profile)
+        ProfilesConfigManager.createProfile(profile)
+        ProfilesConfigManager.ensureProfileJavaConfig(profile)
         // select newly created profile
-        ConfigManager.setSelectedProfile(profile.id)
-        ConfigManager.save()
+        ProfilesConfigManager.setSelectedProfile(profile.id)
+        ProfilesConfigManager.save()
         alert('Profil créé: ' + name)
-        logger.info('Created profile', profile)
+        profilesLogger.info('Created profile', profile)
         refreshProfileButton()
         refreshProfileList()
         hideCreateProfile()
     } catch(err){
-        logger.error('Failed to create profile', err)
+        profilesLogger.error('Failed to create profile', err)
         alert('Erreur lors de la création du profil')
     }
 })
 
 function refreshProfileButton(){
-    const sel = ConfigManager.getSelectedProfile()
+    const sel = ProfilesConfigManager.getSelectedProfile()
     if(sel){
         profileSelectionBtn.innerHTML = `Profil: ${sel.name}`
     } else {
@@ -222,8 +222,8 @@ function refreshProfileButton(){
 
 function refreshProfileList(){
     profilesListContainer.innerHTML = ''
-    const profiles = ConfigManager.getProfiles()
-    const selectedProfile = ConfigManager.getSelectedProfile()
+    const profiles = ProfilesConfigManager.getProfiles()
+    const selectedProfile = ProfilesConfigManager.getSelectedProfile()
 
     if(profiles.length === 0){
         const emptyState = document.createElement('div')
@@ -250,8 +250,8 @@ function refreshProfileList(){
             el.appendChild(name)
             el.appendChild(meta)
             el.addEventListener('click', () => {
-                ConfigManager.setSelectedProfile(p.id)
-                ConfigManager.save()
+                ProfilesConfigManager.setSelectedProfile(p.id)
+                ProfilesConfigManager.save()
                 refreshProfileButton()
                 refreshProfileList()
             })
