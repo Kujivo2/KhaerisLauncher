@@ -32,13 +32,13 @@
       },
       "modules": [
         {
-          "id": "fabric-loader-0.19.2-1.20.1",
-          "name": "Fabric 1.20.1",
-          "type": "VersionManifest",
+          "id": "net.fabricmc:fabric-loader:0.19.2",
+          "name": "Fabric Loader 0.19.2",
+          "type": "Fabric",
           "artifact": {
-            "size": 3000,
+            "size": 0,
             "MD5": "",
-            "url": "https://raw.githubusercontent.com/Kujivo2/KhaerisLauncher/ui-rework/docs/fabric/fabric-loader-0.19.2-1.20.1.json"
+            "url": ""
           }
         }
       ]
