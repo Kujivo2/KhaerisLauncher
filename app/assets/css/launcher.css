@@ -4258,6 +4258,38 @@ input:checked + .toggleSwitchSlider:before {
     outline: none;
     text-shadow: 0 0 16px rgba(216, 180, 254, 0.8) !important;
 }
+
+#createProfileModal .modalContent select,
+#createProfileModal .modalContent input {
+    width: 100%;
+    min-height: 34px;
+    box-sizing: border-box;
+    border: 1px solid rgba(216, 180, 254, 0.28);
+    border-radius: 6px;
+    background: rgba(10, 7, 18, 0.86);
+    color: #fff;
+    font-family: 'Avenir Medium';
+    font-size: 12px;
+    outline: none;
+    padding: 0 10px;
+}
+
+#createProfileModal .modalContent select:focus,
+#createProfileModal .modalContent input:focus {
+    border-color: rgba(216, 180, 254, 0.68);
+    box-shadow: 0 0 18px rgba(139, 92, 246, 0.20);
+}
+
+#profile_version_status {
+    min-height: 16px;
+    color: rgba(255, 255, 255, 0.62);
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    margin-top: 6px;
+    text-transform: uppercase;
+}
 /* Khaeris Glass Panels */
 
 .settingsAuthAccount,

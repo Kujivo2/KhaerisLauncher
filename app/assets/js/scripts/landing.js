@@ -104,6 +104,13 @@ document.getElementById('launch_button').addEventListener('click', async e => {
     loggerLanding.info('Launching game..')
     try {
         const profile = ConfigManager.getSelectedProfile()
+        if(profile?.loader === 'forge') {
+            showLaunchFailure(
+                Lang.queryJS('landing.dlAsync.errorDuringLaunchTitle'),
+                'Les versions Forge sont disponibles dans les profils. Le lancement Forge sera activé avec le moteur Forge de la phase 2.'
+            )
+            return
+        }
         if(LocalProfileBuilder.isLocalProfile(profile)) {
             ConfigManager.ensureProfileJavaConfig(profile)
             ConfigManager.save()
