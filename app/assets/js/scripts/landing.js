@@ -445,6 +445,24 @@ const GAME_JOINED_REGEX = /\[.+\]: Sound engine started/
 const GAME_LAUNCH_REGEX = /^\[.+\]: (?:MinecraftForge .+ Initialized|ModLauncher .+ starting: .+|Loading Minecraft .+ with Fabric Loader .+)$/
 const MIN_LINGER = 5000
 
+function findInvalidModuleArtifactUrl(modules) {
+    for(const module of modules) {
+        const url = module.rawModule.artifact?.url
+        if(typeof url !== 'string' || !/^https?:\/\//.test(url)) {
+            return module.rawModule
+        }
+
+        if(module.hasSubModules()) {
+            const invalidSubModule = findInvalidModuleArtifactUrl(module.subModules)
+            if(invalidSubModule != null) {
+                return invalidSubModule
+            }
+        }
+    }
+
+    return null
+}
+
 async function dlAsync(login = true) {
 
     // Login parameter is temporary for debug purposes. Allows testing the validation/downloads without
@@ -466,6 +484,15 @@ async function dlAsync(login = true) {
     }
 
     const serv = distro.getServerById(ConfigManager.getSelectedServer())
+    const invalidModule = findInvalidModuleArtifactUrl(serv.modules)
+    if(invalidModule != null) {
+        loggerLaunchSuite.error(`Invalid artifact URL for module ${invalidModule.id}: ${invalidModule.artifact?.url}`)
+        showLaunchFailure(
+            Lang.queryJS('landing.dlAsync.errorDuringFileDownloadTitle'),
+            `Invalid download URL for ${invalidModule.name || invalidModule.id}. Check the distribution index.`
+        )
+        return
+    }
 
     if(login) {
         if(ConfigManager.getSelectedAccount() == null){
