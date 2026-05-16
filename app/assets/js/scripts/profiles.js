@@ -1,8 +1,7 @@
 // profiles.js - manage create profile modal and creation
 const ProfilesConfigManager = require('../configmanager')
 const ProfilesGot = require('got')
-const { LoggerUtil } = require('helios-core')
-const profilesLogger = LoggerUtil.getLogger('Profiles')
+const profilesLogger = require('helios-core').LoggerUtil.getLogger('Profiles')
 
 const MOJANG_VERSION_MANIFEST = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
 const FABRIC_LOADER_ENDPOINT = 'https://meta.fabricmc.net/v2/versions/loader'
