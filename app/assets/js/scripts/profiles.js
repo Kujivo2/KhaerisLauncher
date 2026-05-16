@@ -1,6 +1,5 @@
 // profiles.js - manage create profile modal and creation
 const ConfigManager = require('../configmanager')
-const got = require('got')
 const { LoggerUtil } = require('helios-core')
 const logger = LoggerUtil.getLogger('Profiles')
 
@@ -48,7 +47,8 @@ async function loadMinecraftVersions() {
         return minecraftVersionsCache
     }
 
-    const manifest = (await got.get(MOJANG_VERSION_MANIFEST, { responseType: 'json' })).body
+    const response = await fetch(MOJANG_VERSION_MANIFEST)
+    const manifest = await response.json()
     minecraftVersionsCache = manifest.versions.map(version => ({
         id: version.id,
         type: version.type
@@ -61,7 +61,8 @@ async function loadForgeVersions() {
         return forgeVersionsCache
     }
 
-    const xml = (await got.get(FORGE_METADATA_ENDPOINT)).body
+    const response = await fetch(FORGE_METADATA_ENDPOINT)
+    const xml = await response.text()
     forgeVersionsCache = Array.from(xml.matchAll(/<version>([^<]+)<\/version>/g), match => match[1])
     return forgeVersionsCache
 }
@@ -99,7 +100,8 @@ async function populateLoaderVersions() {
     try {
         if(loader === 'fabric') {
             setVersionStatus('Chargement des loaders Fabric...')
-            const loaders = (await got.get(`${FABRIC_LOADER_ENDPOINT}/${mcVersion}`, { responseType: 'json' })).body
+            const response = await fetch(`${FABRIC_LOADER_ENDPOINT}/${mcVersion}`)
+            const loaders = await response.json()
             const options = loaders.map(entry => ({
                 value: entry.loader.version,
                 label: `${entry.loader.version}${entry.loader.stable ? ' (stable)' : ''}`
@@ -143,7 +145,10 @@ function hideCreateProfile(){
 
 createProfileBtn.addEventListener('click', e => {
     e.preventDefault()
-    showCreateProfile()
+    showCreateProfile().catch(err => {
+        logger.error('Failed to open create profile modal', err)
+        setVersionStatus('Impossible de charger les versions.')
+    })
 })
 createProfileCancel.addEventListener('click', e => {
     e.preventDefault()
