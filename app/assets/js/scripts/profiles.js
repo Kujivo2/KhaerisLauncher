@@ -92,7 +92,7 @@ function refreshProfileList(){
     if(profiles.length === 0){
         const emptyState = document.createElement('div')
         emptyState.id = 'profilesEmptyState'
-        emptyState.textContent = 'Aucun profil défini'
+        emptyState.innerHTML = '<span class="profilesEmptyTitle">Aucun profil local</span><span class="profilesEmptyText">Crée un profil Vanilla ou Fabric pour lancer une instance séparée.</span>'
         profilesListContainer.appendChild(emptyState)
     } else {
         for(let p of profiles){

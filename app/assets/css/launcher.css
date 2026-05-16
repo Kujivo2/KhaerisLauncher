@@ -2471,7 +2471,7 @@ input:checked + .toggleSwitchSlider:before {
     display: inline-flex;
     width: 70%;
     height: 100%;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
 }
 #landingContainer > #upper > #right {
@@ -2481,16 +2481,17 @@ input:checked + .toggleSwitchSlider:before {
 }
 
 #landingProfilesPanel {
-    width: min(520px, 82%);
-    max-height: 58%;
+    width: min(460px, 78%);
+    max-height: 210px;
     display: flex;
     flex-direction: column;
-    padding: 18px;
-    border: 1px solid rgba(216, 180, 254, 0.28);
+    margin-bottom: 42px;
+    padding: 14px;
+    border: 1px solid rgba(216, 180, 254, 0.22);
     border-radius: 8px;
-    background: rgba(8, 6, 14, 0.58);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
-    backdrop-filter: blur(6px);
+    background: linear-gradient(180deg, rgba(16, 9, 30, 0.72), rgba(8, 5, 16, 0.56));
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
 }
 
 #landingProfilesHeader {
@@ -2498,26 +2499,26 @@ input:checked + .toggleSwitchSlider:before {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 #landingProfilesTitle {
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 900;
-    line-height: 22px;
+    line-height: 20px;
     text-transform: uppercase;
 }
 
 .landingProfileCreateButton {
-    min-width: 82px;
-    border: 1px solid rgba(255, 255, 255, 0.34);
+    min-width: 74px;
+    border: 1px solid rgba(216, 180, 254, 0.38);
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(139, 92, 246, 0.18);
     color: #fff;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
-    line-height: 28px;
+    line-height: 26px;
     padding: 0 12px;
     text-transform: uppercase;
     transition: 0.25s ease;
@@ -2525,8 +2526,9 @@ input:checked + .toggleSwitchSlider:before {
 
 .landingProfileCreateButton:hover,
 .landingProfileCreateButton:focus {
-    background: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.62);
+    background: rgba(139, 92, 246, 0.34);
+    border-color: rgba(216, 180, 254, 0.68);
+    box-shadow: 0 0 18px rgba(139, 92, 246, 0.32);
     outline: none;
 }
 
@@ -2558,7 +2560,7 @@ input:checked + .toggleSwitchSlider:before {
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    min-height: 48px;
+    min-height: 44px;
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.07);
@@ -2606,11 +2608,30 @@ input:checked + .toggleSwitchSlider:before {
 
 #profilesEmptyState {
     display: flex;
-    align-items: center;
-    min-height: 46px;
-    color: rgba(255, 255, 255, 0.72);
+    flex-direction: column;
+    justify-content: center;
+    min-height: 72px;
+    border: 1px dashed rgba(216, 180, 254, 0.22);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 10px 12px;
+}
+
+.profilesEmptyTitle {
+    color: #fff;
     font-size: 13px;
+    font-weight: 900;
+    line-height: 18px;
+    text-transform: uppercase;
+}
+
+.profilesEmptyText {
+    max-width: 310px;
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 11px;
     font-weight: 700;
+    line-height: 16px;
+    margin-top: 2px;
 }
 
 /* Lower content container. */
@@ -4150,6 +4171,60 @@ input:checked + .toggleSwitchSlider:before {
 
 #launch_button:active {
     transform: translateY(1px);
+}
+
+#landingProfilesPanel {
+    width: min(430px, 76%) !important;
+    max-height: 190px !important;
+    margin-bottom: 30px !important;
+    border-color: rgba(168, 85, 247, 0.26) !important;
+    background: linear-gradient(180deg, rgba(12, 7, 24, 0.76), rgba(7, 4, 14, 0.58)) !important;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.30), 0 0 30px rgba(88, 28, 135, 0.16) !important;
+}
+
+#landingProfilesTitle {
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: 0 0 12px rgba(168, 85, 247, 0.32);
+}
+
+.profileRow,
+#profilesEmptyState {
+    background: rgba(15, 8, 30, 0.46) !important;
+    border-color: rgba(168, 85, 247, 0.22) !important;
+    box-shadow: none !important;
+}
+
+.profileRow[selected] {
+    border-color: rgba(216, 180, 254, 0.58) !important;
+    background: rgba(88, 28, 135, 0.42) !important;
+}
+
+#profile_selection_button {
+    max-width: 86px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    line-height: 16px;
+    padding: 0;
+    text-align: center;
+}
+
+#profile_selection_button,
+#server_selection_button {
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    cursor: pointer;
+}
+
+#profile_selection_button:hover,
+#profile_selection_button:focus,
+#server_selection_button:hover,
+#server_selection_button:focus {
+    color: #fff !important;
+    outline: none;
+    text-shadow: 0 0 16px rgba(216, 180, 254, 0.8) !important;
 }
 /* Khaeris Glass Panels */
 
