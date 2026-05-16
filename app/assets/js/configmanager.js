@@ -96,6 +96,7 @@ const DEFAULT_CONFIG = {
     },
     clientToken: null,
     selectedServer: null, // Resolved
+    selectedProfile: null,
     selectedAccount: null,
     authenticationDatabase: {},
     modConfigurations: [],
@@ -121,7 +122,7 @@ function _profilesPath(){
         // If config not loaded yet, fallback to default data directory
         const base = (config != null && config.settings && config.settings.launcher && config.settings.launcher.dataDirectory) ? config.settings.launcher.dataDirectory : DEFAULT_CONFIG.settings.launcher.dataDirectory
         return path.join(base, 'profiles.json')
-    } catch(err){
+    } catch(_err){
         return path.join(DEFAULT_CONFIG.settings.launcher.dataDirectory, 'profiles.json')
     }
 }
@@ -159,7 +160,7 @@ exports.saveProfiles = function(){
 exports.createProfile = function(profile){
     const profiles = exports.getProfiles()
     profiles.push(profile)
-    const instBase = path.join(exports.getDataDirectory(), 'instances', profile.instanceDir)
+    const instBase = exports.getProfileInstanceDirectory(profile)
     try{
         fs.ensureDirSync(path.join(instBase, 'mods'))
         fs.ensureDirSync(path.join(instBase, 'config'))
@@ -313,16 +314,14 @@ exports.getCommonDirectory = function(){
  * @returns {string} The launcher's instance directory.
  */
 exports.getInstanceDirectory = function(){
-    // If a profile is selected, use its instanceDir as base
-    try{
-        const selected = exports.getSelectedProfile()
-        if(selected && selected.instanceDir){
-            return path.join(exports.getDataDirectory(), 'instances', selected.instanceDir)
-        }
-    } catch(err){
-        // ignore and fallback
-    }
     return path.join(exports.getDataDirectory(), 'instances')
+}
+
+exports.getProfileInstanceDirectory = function(profile = exports.getSelectedProfile()){
+    if(profile?.instanceDir != null) {
+        return path.join(exports.getDataDirectory(), 'instances', profile.instanceDir)
+    }
+    return exports.getInstanceDirectory()
 }
 
 /**
@@ -585,6 +584,57 @@ function defaultJavaConfig(effectiveJavaOptions, ram) {
     }
 }
 
+function getProfileJavaOptions(profile) {
+    const version = profile.minecraftVersion || '1.20.1'
+    const parts = version.split('.').map(v => Number.parseInt(v))
+    const minor = parts[1] || 0
+    const patch = parts[2] || 0
+
+    if(minor > 20 || (minor === 20 && patch >= 5)) {
+        return {
+            supported: '>=21',
+            suggestedMajor: 21,
+            ram: {
+                recommended: 4096,
+                minimum: 2048
+            }
+        }
+    }
+
+    if(minor >= 18) {
+        return {
+            supported: '>=17',
+            suggestedMajor: 17,
+            ram: {
+                recommended: 4096,
+                minimum: 2048
+            }
+        }
+    }
+
+    if(minor >= 17) {
+        return {
+            supported: '>=16',
+            suggestedMajor: 16,
+            ram: {
+                recommended: 4096,
+                minimum: 2048
+            }
+        }
+    }
+
+    return {
+        supported: '>=8',
+        suggestedMajor: 8,
+        ram: {
+            recommended: 2048,
+            minimum: 1024
+        }
+    }
+}
+
+exports.getProfileJavaOptions = getProfileJavaOptions
+
 function defaultJavaConfig8(ram) {
     return {
         minRAM: resolveSelectedRAM(ram),
@@ -625,6 +675,11 @@ exports.ensureJavaConfig = function(serverid, effectiveJavaOptions, ram) {
     if(!Object.prototype.hasOwnProperty.call(config.javaConfig, serverid)) {
         config.javaConfig[serverid] = defaultJavaConfig(effectiveJavaOptions, ram)
     }
+}
+
+exports.ensureProfileJavaConfig = function(profile) {
+    const effectiveJavaOptions = getProfileJavaOptions(profile)
+    exports.ensureJavaConfig(profile.id, effectiveJavaOptions, effectiveJavaOptions.ram)
 }
 
 /**

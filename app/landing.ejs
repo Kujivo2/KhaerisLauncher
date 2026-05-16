@@ -7,6 +7,15 @@
             </div>
         </div>
         <div id="content">
+            <div id="landingProfilesPanel">
+                <div id="landingProfilesHeader">
+                    <span id="landingProfilesTitle">Profils</span>
+                    <button id="create_profile_button" class="landingProfileCreateButton">Créer</button>
+                </div>
+                <div id="profiles_list_container">
+                    <!-- Profiles are populated here. -->
+                </div>
+            </div>
         </div>
         <div id="right">
             <div id="rightContainer">
@@ -117,8 +126,6 @@
                     <button id="server_selection_button" class="bot_label">&#8226; Aucun serveur sélectionné</button>
                     <div class="bot_divider"></div>
                     <button id="profile_selection_button" class="bot_label">Profil: Aucun</button>
-                    <div class="bot_divider"></div>
-                    <button id="create_profile_button" class="bot_label">+ Créer un profil</button>
                 </div>
                 <div id="launch_details">
                     <div id="launch_details_left">
@@ -208,15 +215,6 @@
             <div class="modalActions">
                 <button id="create_profile_confirm">Créer</button>
                 <button id="create_profile_cancel">Annuler</button>
-            </div>
-        </div>
-    </div>
-    <div id="profileSelectionModal" class="modal" style="display:none;">
-        <div class="modalContent">
-            <h3>Sélectionner un profil</h3>
-            <div id="profiles_list_container"></div>
-            <div class="modalActions">
-                <button id="profile_select_close">Fermer</button>
             </div>
         </div>
     </div>

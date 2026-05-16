@@ -29,6 +29,7 @@ const {
 
 // Internal Requirements
 const DiscordWrapper          = require('./assets/js/discordwrapper')
+const LocalProfileBuilder     = require('./assets/js/localprofilebuilder')
 const ProcessBuilder          = require('./assets/js/processbuilder')
 
 // Launch Elements
@@ -102,6 +103,32 @@ function setLaunchEnabled(val){
 document.getElementById('launch_button').addEventListener('click', async e => {
     loggerLanding.info('Launching game..')
     try {
+        const profile = ConfigManager.getSelectedProfile()
+        if(LocalProfileBuilder.isLocalProfile(profile)) {
+            ConfigManager.ensureProfileJavaConfig(profile)
+            ConfigManager.save()
+            const effectiveJavaOptions = LocalProfileBuilder.getEffectiveJavaOptions(profile)
+            const jExe = ConfigManager.getJavaExecutable(profile.id)
+            if(jExe == null){
+                await asyncSystemScan(effectiveJavaOptions)
+            } else {
+
+                setLaunchDetails(Lang.queryJS('landing.launch.pleaseWait'))
+                toggleLaunchArea(true)
+                setLaunchPercentage(0, 100)
+
+                const details = await validateSelectedJvm(ensureJavaDirIsRoot(jExe), effectiveJavaOptions.supported)
+                if(details != null){
+                    loggerLanding.info('Jvm Details', details)
+                    await dlAsync()
+
+                } else {
+                    await asyncSystemScan(effectiveJavaOptions)
+                }
+            }
+            return
+        }
+
         const server = (await DistroAPI.getDistribution()).getServerById(ConfigManager.getSelectedServer())
         const jExe = ConfigManager.getJavaExecutable(ConfigManager.getSelectedServer())
         if(jExe == null){
@@ -354,7 +381,7 @@ async function asyncSystemScan(effectiveJavaOptions, launchAfter = true){
     } else {
         // Java installation found, use this to launch the game.
         const javaExec = javaExecFromRoot(jvmDetails.path)
-        ConfigManager.setJavaExecutable(ConfigManager.getSelectedServer(), javaExec)
+        ConfigManager.setJavaExecutable(getLaunchJavaConfigId(), javaExec)
         ConfigManager.save()
 
         // We need to make sure that the updated value is on the settings UI.
@@ -423,7 +450,7 @@ async function downloadJava(effectiveJavaOptions, launchAfter = true) {
     remote.getCurrentWindow().setProgressBar(-1)
 
     // Extraction completed successfully.
-    ConfigManager.setJavaExecutable(ConfigManager.getSelectedServer(), newJavaExec)
+    ConfigManager.setJavaExecutable(getLaunchJavaConfigId(), newJavaExec)
     ConfigManager.save()
 
     clearInterval(extractListener)
@@ -442,8 +469,13 @@ let hasRPC = false
 // Joined server regex
 // Change this if your server uses something different.
 const GAME_JOINED_REGEX = /\[.+\]: Sound engine started/
-const GAME_LAUNCH_REGEX = /^\[.+\]: (?:MinecraftForge .+ Initialized|ModLauncher .+ starting: .+|Loading Minecraft .+ with Fabric Loader .+)$/
+const GAME_LAUNCH_REGEX = /^\[.+\]: (?:MinecraftForge .+ Initialized|ModLauncher .+ starting: .+|Loading Minecraft .+ with Fabric Loader .+|Setting user: .+)$/
 const MIN_LINGER = 5000
+
+function getLaunchJavaConfigId() {
+    const profile = ConfigManager.getSelectedProfile()
+    return LocalProfileBuilder.isLocalProfile(profile) ? profile.id : ConfigManager.getSelectedServer()
+}
 
 function findInvalidModuleArtifactUrl(modules) {
     for(const module of modules) {
@@ -469,6 +501,11 @@ async function dlAsync(login = true) {
     // launching the game.
 
     const loggerLaunchSuite = LoggerUtil.getLogger('LaunchSuite')
+    const localProfile = ConfigManager.getSelectedProfile()
+    if(LocalProfileBuilder.isLocalProfile(localProfile)) {
+        await dlLocalProfileAsync(localProfile, login, loggerLaunchSuite)
+        return
+    }
 
     setLaunchDetails(Lang.queryJS('landing.dlAsync.loadingServerInfo'))
 
@@ -661,6 +698,108 @@ async function dlAsync(login = true) {
         }
     }
 
+}
+
+async function dlLocalProfileAsync(profile, login, loggerLaunchSuite) {
+    if(login && ConfigManager.getSelectedAccount() == null){
+        loggerLanding.error('You must be logged into an account.')
+        return
+    }
+
+    const builder = new LocalProfileBuilder(profile)
+
+    setLaunchDetails('Préparation du profil local')
+    toggleLaunchArea(true)
+    setLaunchPercentage(0, 100)
+
+    try {
+        await builder.init()
+    } catch(err) {
+        loggerLaunchSuite.error('Unable to prepare local profile.', err)
+        showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringLaunchTitle'), err.message || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
+        return
+    }
+
+    loggerLaunchSuite.info('Validating local profile files.')
+    setLaunchDetails(Lang.queryJS('landing.dlAsync.validatingFileIntegrity'))
+    const totalStages = profile.loader === 'fabric' ? 5 : 4
+    let completedStages = 0
+    let invalidAssets = []
+    try {
+        invalidAssets = await builder.validate(async () => {
+            completedStages++
+            setLaunchPercentage(Math.trunc((completedStages / totalStages) * 100))
+        })
+        setLaunchPercentage(100)
+    } catch(err) {
+        loggerLaunchSuite.error('Error during local profile validation.', err)
+        showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileVerificationTitle'), err.message || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
+        return
+    }
+
+    if(invalidAssets.length > 0) {
+        loggerLaunchSuite.info(`Downloading ${invalidAssets.length} local profile files.`)
+        setLaunchDetails(Lang.queryJS('landing.dlAsync.downloadingFiles'))
+        setLaunchPercentage(0)
+        try {
+            await builder.download(invalidAssets, percent => {
+                setDownloadPercentage(percent)
+            })
+            setDownloadPercentage(100)
+        } catch(err) {
+            loggerLaunchSuite.error('Error during local profile download.', err)
+            showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringFileDownloadTitle'), err.message || Lang.queryJS('landing.dlAsync.seeConsoleForDetails'))
+            return
+        }
+    } else {
+        loggerLaunchSuite.info('No invalid local profile files, skipping download.')
+    }
+
+    remote.getCurrentWindow().setProgressBar(-1)
+    setLaunchDetails(Lang.queryJS('landing.dlAsync.preparingToLaunch'))
+
+    if(login) {
+        const authUser = ConfigManager.getSelectedAccount()
+        const launchData = await builder.getLaunchData()
+        loggerLaunchSuite.info(`Sending selected account (${authUser.displayName}) and local profile (${profile.name}) to ProcessBuilder.`)
+        const pb = new ProcessBuilder(launchData.server, launchData.versionData, launchData.modLoaderData, authUser, remote.app.getVersion(), {
+            gameDir: launchData.gameDir
+        })
+        setLaunchDetails(Lang.queryJS('landing.dlAsync.launchingGame'))
+
+        const onLoadComplete = () => {
+            toggleLaunchArea(false)
+            proc.stdout.removeListener('data', tempListener)
+            proc.stderr.removeListener('data', gameErrorListener)
+        }
+        const start = Date.now()
+
+        const tempListener = function(data){
+            if(GAME_LAUNCH_REGEX.test(data.trim())){
+                const diff = Date.now()-start
+                if(diff < MIN_LINGER) {
+                    setTimeout(onLoadComplete, MIN_LINGER-diff)
+                } else {
+                    onLoadComplete()
+                }
+            }
+        }
+
+        const gameErrorListener = function(data){
+            data = data.trim()
+            loggerLaunchSuite.error(data)
+        }
+
+        try {
+            proc = pb.build()
+            proc.stdout.on('data', tempListener)
+            proc.stderr.on('data', gameErrorListener)
+            setLaunchDetails(Lang.queryJS('landing.dlAsync.doneEnjoyServer'))
+        } catch(err) {
+            loggerLaunchSuite.error('Error during local profile launch', err)
+            showLaunchFailure(Lang.queryJS('landing.dlAsync.errorDuringLaunchTitle'), Lang.queryJS('landing.dlAsync.checkConsoleForDetails'))
+        }
+    }
 }
 
 /**

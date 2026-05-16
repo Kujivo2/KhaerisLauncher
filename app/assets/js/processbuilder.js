@@ -3,7 +3,7 @@ const child_process         = require('child_process')
 const crypto                = require('crypto')
 const fs                    = require('fs-extra')
 const { LoggerUtil }        = require('helios-core')
-const { getMojangOS, isLibraryCompatible, mcVersionAtLeast }  = require('helios-core/common')
+const { getMojangOS, isLibraryCompatible, MavenUtil, mcVersionAtLeast }  = require('helios-core/common')
 const { Type }              = require('helios-distribution-types')
 const os                    = require('os')
 const path                  = require('path')
@@ -23,8 +23,8 @@ const logger = LoggerUtil.getLogger('ProcessBuilder')
  */
 class ProcessBuilder {
 
-    constructor(distroServer, vanillaManifest, modManifest, authUser, launcherVersion){
-        this.gameDir = path.join(ConfigManager.getInstanceDirectory(), distroServer.rawServer.id)
+    constructor(distroServer, vanillaManifest, modManifest, authUser, launcherVersion, options = {}){
+        this.gameDir = options.gameDir || path.join(ConfigManager.getInstanceDirectory(), distroServer.rawServer.id)
         this.commonDir = ConfigManager.getCommonDirectory()
         this.server = distroServer
         this.vanillaManifest = vanillaManifest
@@ -52,7 +52,8 @@ class ProcessBuilder {
         logger.info('Using liteloader:', this.usingLiteLoader)
         this.usingFabricLoader = this.server.modules.some(mdl => mdl.rawModule.type === Type.Fabric)
         logger.info('Using fabric loader:', this.usingFabricLoader)
-        const modObj = this.resolveModConfiguration(ConfigManager.getModConfiguration(this.server.rawServer.id).mods, this.server.modules)
+        const storedModCfg = ConfigManager.getModConfiguration(this.server.rawServer.id)
+        const modObj = this.resolveModConfiguration(storedModCfg?.mods ?? {}, this.server.modules)
         
         // Mod list below 1.13
         // Fabric only supports 1.14+
@@ -404,7 +405,7 @@ class ProcessBuilder {
         const argDiscovery = /\${*(.*)}/
 
         // JVM Arguments First
-        let args = this.vanillaManifest.arguments.jvm
+        let args = [...this.vanillaManifest.arguments.jvm]
 
         // Debug securejarhandler
         // args.push('-Dbsl.debug=true')
@@ -546,7 +547,9 @@ class ProcessBuilder {
         
 
         // Forge Specific Arguments
-        args = args.concat(this.modManifest.arguments.game)
+        if(this.modManifest !== this.vanillaManifest) {
+            args = args.concat(this.modManifest.arguments.game)
+        }
 
         // Filter null values
         args = args.filter(arg => {
@@ -675,7 +678,7 @@ class ProcessBuilder {
     classpathArg(mods, tempNativePath){
         let cpArgs = []
 
-        if(!mcVersionAtLeast('1.17', this.server.rawServer.minecraftVersion) || this.usingFabricLoader) {
+        if(!mcVersionAtLeast('1.17', this.server.rawServer.minecraftVersion) || this.usingFabricLoader || this.server.modules.length === 0) {
             // Add the version.jar to the classpath.
             // Must not be added to the classpath for Forge 1.17+.
             const version = this.vanillaManifest.id
@@ -696,7 +699,9 @@ class ProcessBuilder {
         // Merge libraries, server libs with the same
         // maven identifier will override the mojang ones.
         // Ex. 1.7.10 forge overrides mojang's guava with newer version.
-        const finalLibs = {...mojangLibs, ...servLibs}
+        const modManifestLibs = this._resolveModManifestLibraries()
+
+        const finalLibs = {...mojangLibs, ...modManifestLibs, ...servLibs}
         cpArgs = cpArgs.concat(Object.values(finalLibs))
 
         this._processClassPathList(cpArgs)
@@ -818,6 +823,33 @@ class ProcessBuilder {
                     const versionIndependentId = lib.name.substring(0, lib.name.lastIndexOf(':'))
                     libs[versionIndependentId] = to
                 }
+            }
+        }
+
+        return libs
+    }
+
+    _resolveModManifestLibraries(){
+        const libs = {}
+        if(this.modManifest === this.vanillaManifest || this.modManifest.libraries == null) {
+            return libs
+        }
+
+        for(const lib of this.modManifest.libraries) {
+            if(lib.name == null) {
+                continue
+            }
+
+            let target = null
+            if(lib.downloads?.artifact?.path != null) {
+                target = path.join(this.libPath, lib.downloads.artifact.path)
+            } else if(lib.url != null && MavenUtil.isMavenIdentifier(lib.name)) {
+                target = path.join(this.libPath, MavenUtil.mavenIdentifierAsPath(lib.name))
+            }
+
+            if(target != null) {
+                const versionIndependentId = lib.name.substring(0, lib.name.lastIndexOf(':'))
+                libs[versionIndependentId] = target
             }
         }
 

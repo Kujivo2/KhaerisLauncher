@@ -9,9 +9,7 @@ const createProfileModal = document.getElementById('createProfileModal')
 const createProfileConfirm = document.getElementById('create_profile_confirm')
 const createProfileCancel = document.getElementById('create_profile_cancel')
 const profileSelectionBtn = document.getElementById('profile_selection_button')
-const profileSelectionModal = document.getElementById('profileSelectionModal')
 const profilesListContainer = document.getElementById('profiles_list_container')
-const profileSelectClose = document.getElementById('profile_select_close')
 
 function showCreateProfile(){
     createProfileModal.style.display = 'flex'
@@ -40,6 +38,14 @@ createProfileConfirm.addEventListener('click', async e => {
         alert('Veuillez fournir un nom pour le profil')
         return
     }
+    if(!mcver){
+        alert('Veuillez fournir une version Minecraft pour le profil')
+        return
+    }
+    if(loader !== 'vanilla' && loader !== 'fabric'){
+        alert('Seuls Vanilla et Fabric sont disponibles pour le moment')
+        return
+    }
 
     const slug = name.toLowerCase().replace(/[^a-z0-9_-]/g, '-')
     const instanceDir = `${slug}-${Date.now()}`
@@ -54,12 +60,14 @@ createProfileConfirm.addEventListener('click', async e => {
 
     try{
         ConfigManager.createProfile(profile)
+        ConfigManager.ensureProfileJavaConfig(profile)
         // select newly created profile
         ConfigManager.setSelectedProfile(profile.id)
         ConfigManager.save()
         alert('Profil créé: ' + name)
         logger.info('Created profile', profile)
         refreshProfileButton()
+        refreshProfileList()
         hideCreateProfile()
     } catch(err){
         logger.error('Failed to create profile', err)
@@ -76,40 +84,51 @@ function refreshProfileButton(){
     }
 }
 
-function openProfileSelection(){
+function refreshProfileList(){
     profilesListContainer.innerHTML = ''
     const profiles = ConfigManager.getProfiles()
+    const selectedProfile = ConfigManager.getSelectedProfile()
+
     if(profiles.length === 0){
-        profilesListContainer.innerHTML = '<div>Aucun profil défini</div>'
+        const emptyState = document.createElement('div')
+        emptyState.id = 'profilesEmptyState'
+        emptyState.textContent = 'Aucun profil défini'
+        profilesListContainer.appendChild(emptyState)
     } else {
         for(let p of profiles){
-            const el = document.createElement('div')
+            const el = document.createElement('button')
             el.className = 'profileRow'
-            el.innerHTML = `<span class="profileName">${p.name}</span> <span class="profileMeta">${p.minecraftVersion || ''} ${p.loader || ''}</span>`
-            const selBtn = document.createElement('button')
-            selBtn.textContent = 'Sélectionner'
-            selBtn.addEventListener('click', () => {
+            el.type = 'button'
+            if(selectedProfile?.id === p.id) {
+                el.setAttribute('selected', '')
+            }
+
+            const name = document.createElement('span')
+            name.className = 'profileName'
+            name.textContent = p.name
+
+            const meta = document.createElement('span')
+            meta.className = 'profileMeta'
+            meta.textContent = [p.minecraftVersion, p.loader, p.loaderVersion].filter(v => v != null && v !== '').join(' - ')
+
+            el.appendChild(name)
+            el.appendChild(meta)
+            el.addEventListener('click', () => {
                 ConfigManager.setSelectedProfile(p.id)
                 ConfigManager.save()
                 refreshProfileButton()
-                profileSelectionModal.style.display = 'none'
+                refreshProfileList()
             })
-            el.appendChild(selBtn)
             profilesListContainer.appendChild(el)
         }
     }
-    profileSelectionModal.style.display = 'flex'
 }
 
 profileSelectionBtn.addEventListener('click', e => {
     e.preventDefault()
-    openProfileSelection()
-})
-
-profileSelectClose.addEventListener('click', e => {
-    e.preventDefault()
-    profileSelectionModal.style.display = 'none'
+    profilesListContainer.scrollIntoView({ behavior: 'smooth', block: 'center' })
 })
 
 // Initialize button text on load
 refreshProfileButton()
+refreshProfileList()
