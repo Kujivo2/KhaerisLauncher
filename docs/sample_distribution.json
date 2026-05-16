@@ -101,6 +101,17 @@
                 "url": "https://maven.fabricmc.net/org/ow2/asm/asm-util/9.9/asm-util-9.9.jar"
               }
             }
+            ,
+            {
+              "id": "net.fabricmc:sponge-mixin:0.17.2+mixin.0.8.7",
+              "name": "Sponge Mixin",
+              "type": "Library",
+              "artifact": {
+                "size": 1540039,
+                "MD5": "",
+                "url": "https://maven.fabricmc.net/net/fabricmc/sponge-mixin/0.17.2+mixin.0.8.7/sponge-mixin-0.17.2+mixin.0.8.7.jar"
+              }
+            }
           ]
         }
       ]
