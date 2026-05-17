@@ -1197,3 +1197,9 @@ async function loadNews(){
 
     return await promise
 }
+
+try {
+    require('./assets/js/scripts/profiles')
+} catch(err) {
+    loggerLanding.error('Failed to initialize profiles UI from landing script', err)
+}

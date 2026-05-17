@@ -1,13 +1,28 @@
 // profiles.js - manage create profile modal and creation
 (() => {
-    const ProfilesConfigManager = require('./assets/js/configmanager')
+    if(window.__khaerisProfilesInitialized === true) {
+        return
+    }
+    window.__khaerisProfilesInitialized = true
+
+    function requireProfileDependency(paths) {
+        let lastError = null
+        for(const dependencyPath of paths) {
+            try {
+                return require(dependencyPath)
+            } catch(err) {
+                lastError = err
+            }
+        }
+        throw lastError
+    }
+
+    const ProfilesConfigManager = requireProfileDependency(['./assets/js/configmanager', '../configmanager'])
     const ProfilesGot = require('got')
     const profilesLogger = require('helios-core').LoggerUtil.getLogger('Profiles')
 
     const MOJANG_VERSION_MANIFEST = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
     const FABRIC_LOADER_ENDPOINT = 'https://meta.fabricmc.net/v2/versions/loader'
-    const FORGE_METADATA_ENDPOINT = 'https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml'
-
     // Elements
     const createProfileBtn = document.getElementById('create_profile_button')
     const createProfileModal = document.getElementById('createProfileModal')
@@ -21,8 +36,6 @@
     const profileVersionStatus = document.getElementById('profile_version_status')
 
     let minecraftVersionsCache = null
-    let forgeVersionsCache = null
-
     function setVersionStatus(text) {
         profileVersionStatus.textContent = text || ''
     }
@@ -72,16 +85,6 @@
         return minecraftVersionsCache
     }
 
-    async function loadForgeVersions() {
-        if(forgeVersionsCache != null) {
-            return forgeVersionsCache
-        }
-
-        const xml = (await ProfilesGot.get(FORGE_METADATA_ENDPOINT)).body
-        forgeVersionsCache = Array.from(xml.matchAll(/<version>([^<]+)<\/version>/g), match => match[1])
-        return forgeVersionsCache
-    }
-
     async function populateMinecraftVersions() {
         setVersionStatus('Chargement des versions Minecraft...')
         setMinecraftVersionOptions([], 'Chargement...')
@@ -119,16 +122,6 @@
                     label: `${entry.loader.version}${entry.loader.stable ? ' (stable)' : ''}`
                 }))
                 setLoaderVersionOptions(options, options.length > 0 ? 'Auto stable' : 'Aucune version Fabric compatible')
-            } else if(loader === 'forge') {
-                setVersionStatus('Chargement des builds Forge...')
-                const forgeVersions = await loadForgeVersions()
-                const options = forgeVersions
-                    .filter(version => version.startsWith(`${mcVersion}-`))
-                    .map(version => ({
-                        value: version,
-                        label: version.substring(mcVersion.length + 1)
-                    }))
-                setLoaderVersionOptions(options, options.length > 0 ? 'Dernière build Forge' : 'Aucune build Forge compatible')
             }
         } catch(err) {
             profilesLogger.error('Failed to load loader versions', err)
@@ -190,8 +183,8 @@
             alert('Veuillez fournir une version Minecraft pour le profil')
             return
         }
-        if(loader !== 'vanilla' && loader !== 'fabric' && loader !== 'forge'){
-            alert('Seuls Vanilla, Fabric et Forge sont disponibles pour le moment')
+        if(loader !== 'vanilla' && loader !== 'fabric'){
+            alert('Seuls Vanilla et Fabric sont disponibles pour le moment')
             return
         }
 
@@ -240,7 +233,7 @@
         if(profiles.length === 0){
             const emptyState = document.createElement('div')
             emptyState.id = 'profilesEmptyState'
-            emptyState.innerHTML = '<span class="profilesEmptyTitle">Aucun profil local</span><span class="profilesEmptyText">Crée un profil Vanilla, Fabric ou Forge pour préparer une instance séparée.</span>'
+            emptyState.innerHTML = '<span class="profilesEmptyTitle">Aucun profil local</span><span class="profilesEmptyText">Crée un profil Vanilla ou Fabric pour préparer une instance séparée.</span>'
             profilesListContainer.appendChild(emptyState)
         } else {
             for(let p of profiles){
