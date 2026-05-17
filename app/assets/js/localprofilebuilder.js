@@ -1,6 +1,8 @@
 const fs = require('fs-extra')
 const got = require('got')
 const path = require('path')
+const AdmZip = require('adm-zip')
+const { pipeline } = require('stream/promises')
 const { downloadQueue, getExpectedDownloadSize, MojangIndexProcessor } = require('helios-core/dl')
 const { HeliosDistribution, MavenUtil, validateLocalFile } = require('helios-core/common')
 
@@ -8,6 +10,8 @@ const ConfigManager = require('./configmanager')
 
 const FABRIC_META_ENDPOINT = 'https://meta.fabricmc.net/v2'
 const FABRIC_MAVEN_ENDPOINT = 'https://maven.fabricmc.net/'
+const FORGE_MAVEN_ENDPOINT = 'https://maven.minecraftforge.net/'
+const FORGE_METADATA_ENDPOINT = `${FORGE_MAVEN_ENDPOINT}net/minecraftforge/forge/maven-metadata.xml`
 const HASH_ALGO_MD5 = 'md5'
 const HASH_ALGO_SHA1 = 'sha1'
 
@@ -23,6 +27,34 @@ function libraryUrl(lib) {
     return normalizeRepoUrl(lib.url || FABRIC_MAVEN_ENDPOINT) + MavenUtil.mavenIdentifierAsPath(lib.name).replace(/\\/g, '/')
 }
 
+function artifactPath(commonDir, artifact) {
+    return path.join(commonDir, 'libraries', artifact.path)
+}
+
+function artifactAsset(id, artifact) {
+    return {
+        id,
+        hash: artifact.sha1 || null,
+        algo: HASH_ALGO_SHA1,
+        size: artifact.size || 1,
+        url: artifact.url,
+        path: artifact.path
+    }
+}
+
+function compareVersionParts(a, b) {
+    const aParts = a.split('.').map(part => Number.parseInt(part))
+    const bParts = b.split('.').map(part => Number.parseInt(part))
+    const len = Math.max(aParts.length, bParts.length)
+    for(let i=0; i<len; i++) {
+        const diff = (aParts[i] || 0) - (bParts[i] || 0)
+        if(diff !== 0) {
+            return diff
+        }
+    }
+    return 0
+}
+
 class LocalProfileBuilder {
 
     constructor(profile) {
@@ -32,10 +64,13 @@ class LocalProfileBuilder {
         this.mojangProcessor = new MojangIndexProcessor(this.commonDir, profile.minecraftVersion)
         this.fabricManifest = null
         this.fabricLoaderVersion = profile.loaderVersion || null
+        this.forgeManifest = null
+        this.forgeInstallProfile = null
+        this.forgeVersion = profile.loaderVersion || null
     }
 
     static isLocalProfile(profile) {
-        return profile != null && (profile.loader === 'vanilla' || profile.loader === 'fabric')
+        return profile != null && (profile.loader === 'vanilla' || profile.loader === 'fabric' || profile.loader === 'forge')
     }
 
     static getEffectiveJavaOptions(profile) {
@@ -54,6 +89,18 @@ class LocalProfileBuilder {
                     MD5: null,
                     url: `${FABRIC_MAVEN_ENDPOINT}net/fabricmc/fabric-loader/${this.fabricLoaderVersion}/fabric-loader-${this.fabricLoaderVersion}.jar`
                 }
+            })
+        } else if(this.profile.loader === 'forge') {
+            modules.push({
+                id: `net.minecraftforge:forge:${this.profile.minecraftVersion}-${this.forgeVersion}:universal`,
+                name: `Forge ${this.forgeVersion}`,
+                type: 'ForgeHosted',
+                artifact: {
+                    size: 0,
+                    MD5: null,
+                    url: `${FORGE_MAVEN_ENDPOINT}net/minecraftforge/forge/${this.profile.minecraftVersion}-${this.forgeVersion}/forge-${this.profile.minecraftVersion}-${this.forgeVersion}-universal.jar`
+                },
+                subModules: this.forgeRuntimeModules()
             })
         }
 
@@ -78,6 +125,35 @@ class LocalProfileBuilder {
                 }
             ]
         }
+    }
+
+    forgeRuntimeModules() {
+        if(this.forgeInstallProfile == null) {
+            return []
+        }
+
+        const forgeMavenVersion = `${this.profile.minecraftVersion}-${this.forgeVersion}`
+        const runtimeIds = new Set([
+            `net.minecraftforge:forge:${forgeMavenVersion}:universal`,
+            `net.minecraftforge:fmlcore:${forgeMavenVersion}`,
+            `net.minecraftforge:javafmllanguage:${forgeMavenVersion}`,
+            `net.minecraftforge:lowcodelanguage:${forgeMavenVersion}`,
+            `net.minecraftforge:mclanguage:${forgeMavenVersion}`
+        ])
+
+        return (this.forgeInstallProfile.libraries || [])
+            .filter(lib => runtimeIds.has(lib.name) && lib.downloads?.artifact?.url != null)
+            .map(lib => ({
+                id: lib.name,
+                name: lib.name,
+                type: 'Library',
+                artifact: {
+                    size: lib.downloads.artifact.size || 0,
+                    MD5: null,
+                    path: lib.downloads.artifact.path,
+                    url: lib.downloads.artifact.url
+                }
+            }))
     }
 
     async resolveFabricLoaderVersion() {
@@ -117,10 +193,76 @@ class LocalProfileBuilder {
         return this.fabricManifest
     }
 
+    async resolveForgeVersion() {
+        if(this.forgeVersion != null) {
+            return this.forgeVersion
+        }
+
+        const xml = (await got.get(FORGE_METADATA_ENDPOINT)).body
+        const prefix = `${this.profile.minecraftVersion}-`
+        const versions = Array.from(xml.matchAll(/<version>([^<]+)<\/version>/g), match => match[1])
+            .filter(version => version.startsWith(prefix))
+            .map(version => version.substring(prefix.length))
+            .sort((a, b) => compareVersionParts(b, a))
+
+        if(versions.length === 0) {
+            throw new Error(`No official Forge build is available for Minecraft ${this.profile.minecraftVersion}.`)
+        }
+
+        this.forgeVersion = versions[0]
+        this.profile.loaderVersion = this.forgeVersion
+        ConfigManager.saveProfiles()
+        return this.forgeVersion
+    }
+
+    async loadForgeManifest() {
+        if(this.profile.loader !== 'forge') {
+            return null
+        }
+
+        await this.resolveForgeVersion()
+        const forgeVersionId = `${this.profile.minecraftVersion}-forge-${this.forgeVersion}`
+        const manifestPath = path.join(this.commonDir, 'versions', forgeVersionId, `${forgeVersionId}.json`)
+        const installProfilePath = path.join(this.commonDir, 'versions', forgeVersionId, 'install_profile.json')
+        if(await fs.pathExists(manifestPath) && await fs.pathExists(installProfilePath)) {
+            this.forgeManifest = await fs.readJson(manifestPath)
+            this.forgeInstallProfile = await fs.readJson(installProfilePath)
+            return this.forgeManifest
+        }
+
+        const forgeMavenVersion = `${this.profile.minecraftVersion}-${this.forgeVersion}`
+        const installerUrl = `${FORGE_MAVEN_ENDPOINT}net/minecraftforge/forge/${forgeMavenVersion}/forge-${forgeMavenVersion}-installer.jar`
+        const installerPath = path.join(this.commonDir, 'libraries', 'net', 'minecraftforge', 'forge', forgeMavenVersion, `forge-${forgeMavenVersion}-installer.jar`)
+        await fs.ensureDir(path.dirname(installerPath))
+        await pipeline(got.stream(installerUrl), fs.createWriteStream(installerPath))
+
+        const zip = new AdmZip(installerPath)
+        const manifestEntry = zip.getEntry('version.json')
+        const installProfileEntry = zip.getEntry('install_profile.json')
+        if(manifestEntry == null || installProfileEntry == null) {
+            throw new Error(`Forge installer ${forgeMavenVersion} does not contain the expected official manifests.`)
+        }
+
+        this.forgeManifest = JSON.parse(manifestEntry.getData().toString('utf8'))
+        this.forgeInstallProfile = JSON.parse(installProfileEntry.getData().toString('utf8'))
+        await fs.ensureDir(path.dirname(manifestPath))
+        await fs.writeJson(manifestPath, this.forgeManifest)
+        await fs.writeJson(installProfilePath, this.forgeInstallProfile)
+        return this.forgeManifest
+    }
+
     async init() {
         await this.mojangProcessor.init()
         await this.loadFabricManifest()
+        await this.loadForgeManifest()
         await fs.ensureDir(this.gameDir)
+    }
+
+    totalStages() {
+        if(this.profile.loader === 'fabric' || this.profile.loader === 'forge') {
+            return 5
+        }
+        return 4
     }
 
     async validate(onStageComplete) {
@@ -130,6 +272,13 @@ class LocalProfileBuilder {
 
         if(this.fabricManifest != null) {
             for(const asset of await this.validateFabricLibraries()) {
+                invalid.push(asset)
+            }
+            await onStageComplete()
+        }
+
+        if(this.forgeManifest != null) {
+            for(const asset of await this.validateForgeLibraries()) {
                 invalid.push(asset)
             }
             await onStageComplete()
@@ -162,6 +311,36 @@ class LocalProfileBuilder {
         return invalid
     }
 
+    async validateForgeLibraries() {
+        const invalid = []
+        const libraries = [
+            ...(this.forgeManifest.libraries || []),
+            ...(this.forgeInstallProfile?.libraries || [])
+        ]
+        const seen = new Set()
+
+        for(const lib of libraries) {
+            const artifact = lib.downloads?.artifact
+            if(lib.name == null || artifact?.path == null || artifact?.url == null) {
+                continue
+            }
+
+            const target = artifactPath(this.commonDir, artifact)
+            if(seen.has(target)) {
+                continue
+            }
+            seen.add(target)
+
+            if(!await validateLocalFile(target, HASH_ALGO_SHA1, artifact.sha1 || null)) {
+                const asset = artifactAsset(lib.name, artifact)
+                asset.path = target
+                invalid.push(asset)
+            }
+        }
+
+        return invalid
+    }
+
     async download(assets, onProgress) {
         if(assets.length === 0) {
             onProgress(100)
@@ -182,7 +361,7 @@ class LocalProfileBuilder {
         return {
             server,
             versionData,
-            modLoaderData: this.fabricManifest || versionData,
+            modLoaderData: this.fabricManifest || this.forgeManifest || versionData,
             gameDir: this.gameDir
         }
     }

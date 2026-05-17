@@ -38,6 +38,7 @@ class ProcessBuilder {
 
         this.usingLiteLoader = false
         this.usingFabricLoader = false
+        this.usingForgeLoader = false
         this.llPath = null
     }
     
@@ -52,6 +53,8 @@ class ProcessBuilder {
         logger.info('Using liteloader:', this.usingLiteLoader)
         this.usingFabricLoader = this.server.modules.some(mdl => mdl.rawModule.type === Type.Fabric)
         logger.info('Using fabric loader:', this.usingFabricLoader)
+        this.usingForgeLoader = this.server.modules.some(mdl => mdl.rawModule.type === Type.Forge || mdl.rawModule.type === Type.ForgeHosted)
+        logger.info('Using forge loader:', this.usingForgeLoader)
         const storedModCfg = ConfigManager.getModConfiguration(this.server.rawServer.id)
         const modObj = this.resolveModConfiguration(storedModCfg?.mods ?? {}, this.server.modules)
         
@@ -871,7 +874,7 @@ class ProcessBuilder {
         // Locate Forge/Fabric/Libraries
         for(let mdl of mdls){
             const type = mdl.rawModule.type
-            if(type === Type.ForgeHosted || type === Type.Fabric || type === Type.Library){
+            if(type === Type.Forge || type === Type.ForgeHosted || type === Type.Fabric || type === Type.Library){
                 libs[mdl.getVersionlessMavenIdentifier()] = mdl.getPath()
                 if(mdl.subModules.length > 0){
                     const res = this._resolveModuleLibraries(mdl)

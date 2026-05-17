@@ -23,6 +23,7 @@
 
     const MOJANG_VERSION_MANIFEST = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
     const FABRIC_LOADER_ENDPOINT = 'https://meta.fabricmc.net/v2/versions/loader'
+    const FORGE_METADATA_ENDPOINT = 'https://maven.minecraftforge.net/net/minecraftforge/forge/maven-metadata.xml'
     // Elements
     const createProfileBtn = document.getElementById('create_profile_button')
     const createProfileModal = document.getElementById('createProfileModal')
@@ -36,6 +37,21 @@
     const profileVersionStatus = document.getElementById('profile_version_status')
 
     let minecraftVersionsCache = null
+    let forgeVersionsCache = null
+
+    function compareVersionParts(a, b) {
+        const aParts = a.split('.').map(part => Number.parseInt(part))
+        const bParts = b.split('.').map(part => Number.parseInt(part))
+        const len = Math.max(aParts.length, bParts.length)
+        for(let i=0; i<len; i++) {
+            const diff = (aParts[i] || 0) - (bParts[i] || 0)
+            if(diff !== 0) {
+                return diff
+            }
+        }
+        return 0
+    }
+
     function setVersionStatus(text) {
         profileVersionStatus.textContent = text || ''
     }
@@ -97,6 +113,16 @@
         setVersionStatus('')
     }
 
+    async function loadForgeVersions() {
+        if(forgeVersionsCache != null) {
+            return forgeVersionsCache
+        }
+
+        const xml = (await ProfilesGot.get(FORGE_METADATA_ENDPOINT)).body
+        forgeVersionsCache = Array.from(xml.matchAll(/<version>([^<]+)<\/version>/g), match => match[1])
+        return forgeVersionsCache
+    }
+
     async function populateLoaderVersions() {
         const mcVersion = profileMcVersion.value
         const loader = profileLoader.value
@@ -122,6 +148,18 @@
                     label: `${entry.loader.version}${entry.loader.stable ? ' (stable)' : ''}`
                 }))
                 setLoaderVersionOptions(options, options.length > 0 ? 'Auto stable' : 'Aucune version Fabric compatible')
+            } else if(loader === 'forge') {
+                setVersionStatus('Chargement des builds Forge officielles...')
+                const forgeVersions = await loadForgeVersions()
+                const options = forgeVersions
+                    .filter(version => version.startsWith(`${mcVersion}-`))
+                    .map(version => version.substring(mcVersion.length + 1))
+                    .sort((a, b) => compareVersionParts(b, a))
+                    .map(version => ({
+                        value: version,
+                        label: version
+                    }))
+                setLoaderVersionOptions(options, options.length > 0 ? null : 'Aucune build Forge compatible')
             }
         } catch(err) {
             profilesLogger.error('Failed to load loader versions', err)
@@ -183,15 +221,28 @@
             alert('Veuillez fournir une version Minecraft pour le profil')
             return
         }
-        if(loader !== 'vanilla' && loader !== 'fabric'){
-            alert('Seuls Vanilla et Fabric sont disponibles pour le moment')
+        if(loader !== 'vanilla' && loader !== 'fabric' && loader !== 'forge'){
+            alert('Seuls Vanilla, Fabric et Forge sont disponibles pour le moment')
+            return
+        }
+        if(loader === 'forge' && !loaderv){
+            alert('Veuillez choisir une version Forge officielle')
             return
         }
 
-        const slug = name.toLowerCase().replace(/[^a-z0-9_-]/g, '-')
-        const instanceDir = `${slug}-${Date.now()}`
+        const baseSlug = name.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/^-+|-+$/g, '') || 'profile'
+        const existingProfiles = ProfilesConfigManager.getProfiles()
+        const existingIds = new Set(existingProfiles.map(profile => profile.id))
+        const existingInstanceDirs = new Set(existingProfiles.map(profile => profile.instanceDir))
+        let slug = baseSlug
+        let suffix = 2
+        while(existingIds.has(slug) || existingInstanceDirs.has(slug)) {
+            slug = `${baseSlug}-${suffix}`
+            suffix++
+        }
+        const instanceDir = slug
         const profile = {
-            id: `profile-${Date.now()}`,
+            id: slug,
             name: name,
             minecraftVersion: mcver,
             loader: loader,
@@ -233,7 +284,7 @@
         if(profiles.length === 0){
             const emptyState = document.createElement('div')
             emptyState.id = 'profilesEmptyState'
-            emptyState.innerHTML = '<span class="profilesEmptyTitle">Aucun profil local</span><span class="profilesEmptyText">Crée un profil Vanilla ou Fabric pour préparer une instance séparée.</span>'
+            emptyState.innerHTML = '<span class="profilesEmptyTitle">Aucun profil local</span><span class="profilesEmptyText">Crée un profil Vanilla, Fabric ou Forge pour préparer une instance séparée.</span>'
             profilesListContainer.appendChild(emptyState)
         } else {
             for(let p of profiles){
